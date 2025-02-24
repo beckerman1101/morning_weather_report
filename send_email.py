@@ -19,9 +19,9 @@ os.environ["LANG"] = "en_US.UTF-8"
 
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
-email = os.getenv("GOOGLE_EMAIL")
-pw = os.getenv("GOOGLE_PASSWORD")
-recipients = os.getenv("EMAIL_RECIPIENTS")
+email = str(os.getenv("GOOGLE_EMAIL"))
+pw = str(os.getenv("GOOGLE_PASSWORD"))
+recipients = str(os.getenv("EMAIL_RECIPIENTS"))
 
 if not GOOGLE_EMAIL:
     print("❌ GOOGLE_EMAIL is missing!")
@@ -80,7 +80,5 @@ body = "This email is automated. Attached is the report for snowfall statewide i
 attachment_file_path = path  # Make sure the path is correct
 
 #send_email_with_attachment(sender_email, receiver_emails, subject, body, attachment_file_path)
-print(email)
-print(pw)
-print(recipients)
+
 
