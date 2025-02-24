@@ -29,7 +29,9 @@ import os
 
 
 # In[2]:
-
+GOOGLE_EMAIL = os.getenv("GOOGLE_EMAIL")
+GOOGLE_PASSWORD = os.getenv("GOOGLE_PASSWORD")
+EMAIL_RECIPIENTS = os.getenv("EMAIL_RECIPIENTS")
 
 #Map Variable Setup
 
@@ -236,15 +238,15 @@ def send_email_with_attachment(sender_email, receiver_emails, subject, body, att
     # Send the email
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-            server.login(sender_email, "odlr fivp dbxz mzcu")  # Use an app password if 2FA is enabled
+            server.login(sender_email, f"{GOOLE_PASSWORD}")  # Use an app password if 2FA is enabled
             server.sendmail(sender_email, receiver_emails, msg.as_string())
             print(f'Email sent successfully to: {", ".join(receiver_emails)} with attachment: {attachment_file_path}')
     except Exception as e:
         print(f"Failed to send email: {e}")
 
 # Example usage
-sender_email = "brendan.eckerman@state.co.us"
-receiver_emails = ["brendan.eckerman@state.co.us", "beckerman1101@gmail.com"]  # Add multiple emails in a list
+sender_email = f"{GOOGLE_EMAIL}"
+receiver_emails = [f"{EMAIL_RECIPIENTS}"]  # Add multiple emails in a list
 subject = "24-Hour Snowfall Report"
 body = "This email is automated. Attached is the report for snowfall statewide in the past 24 hours. Data is preliminary and has not been refined for quality control."
 attachment_file_path = path  # Make sure the path is correct
