@@ -64,7 +64,7 @@ def send_email_with_attachment(sender_email, receiver_emails, subject, body, att
     # Send the email
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-            server.login(sender_email, os.getenv("GOOGLE_PASSWORD"))  
+            server.login(sender_email, pw)  
             
             # 🔹 FIX 2: Encode the entire email as UTF-8 before sending
             server.sendmail(sender_email, receiver_emails, msg.as_string().encode('utf-8'))
@@ -77,8 +77,8 @@ def send_email_with_attachment(sender_email, receiver_emails, subject, body, att
 
 #recipients = recipients.split(",")
 # Example usage
-sender_email = f"{email}"
-receiver_emails = f"{recipients}"  # Add multiple emails in a list
+sender_email = email
+receiver_emails = recipients  # Add multiple emails in a list
 subject = "24-Hour Snowfall Report"
 body = "This email is automated. Attached is the report for snowfall statewide in the past 24 hours. Data is preliminary and has not been refined for quality control."
 attachment_file_path = path  # Make sure the path is correct
