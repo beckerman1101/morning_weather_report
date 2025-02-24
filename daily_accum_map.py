@@ -22,6 +22,7 @@ import requests
 from zoneinfo import ZoneInfo
 import zipfile
 import os
+os.environ['SHAPE_RESTORE_SHX'] = 'YES'
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 
