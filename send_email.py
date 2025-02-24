@@ -72,5 +72,4 @@ body = "This email is automated. Attached is the report for snowfall statewide i
 attachment_file_path = path  # Make sure the path is correct
 
 send_email_with_attachment(sender_email, receiver_emails, subject, body, attachment_file_path)
-test_string = "‘Smart Quotes’ and Unicode ✓"
-print(test_string.encode('utf-8'))
+
