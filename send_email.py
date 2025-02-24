@@ -76,10 +76,12 @@ send_email_with_attachment(sender_email, receiver_emails, subject, body, attachm
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
-
 logging.debug(f"GOOGLE_EMAIL: {os.getenv('GOOGLE_EMAIL')}")
 logging.debug(f"GOOGLE_PASSWORD: {os.getenv('GOOGLE_PASSWORD')}")
 logging.debug(f"EMAIL_RECIPIENTS: {os.getenv('EMAIL_RECIPIENTS')}")
+print(email)
+print(pw)
+print(recipients)
 
 
 
