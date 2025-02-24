@@ -25,7 +25,7 @@ jobs:
       
       - name: Upgrade pip
         run: |
-          source venv/bin/activate  # Activate the virtual environment
+          venv/bin/activate  # Activate the virtual environment
           python -m pip install --upgrade pip
 
       - name: Install dependencies
