@@ -7,7 +7,7 @@ on:
 
 jobs:
   run-script:
-    runs-on: ubuntu-latest  # You can switch to 'windows-latest' if needed
+    runs-on: windows-latest  # You can switch to 'windows-latest' if needed
 
     steps:
       - name: Checkout repository
