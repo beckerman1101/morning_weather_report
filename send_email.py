@@ -10,6 +10,8 @@ GOOGLE_EMAIL = os.getenv("GOOGLE_EMAIL")
 GOOGLE_PASSWORD = os.getenv("GOOGLE_PASSWORD")
 EMAIL_RECIPIENTS = os.getenv("EMAIL_RECIPIENTS")
 
+today = datetime.today()
+todaystr = today.strftime('%Y%m%d')
 path = os.path.join(base_dir, 'daily_file', f'24houraccum_{todaystr}.png')
 
 def send_email_with_attachment(sender_email, receiver_emails, subject, body, attachment_file_path):
