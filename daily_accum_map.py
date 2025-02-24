@@ -60,7 +60,7 @@ co_bounds = [-109.05,-102.05,37,41]
 x = .15
 
 #Placefiles for counties, interstates, state highways, and manipulating the regions shapefile to plot properly
-counties = gpd.read_file(os.path.join(base_dir, 'shapefiles', 'tl_2019_08_county_shp'))
+counties = gpd.read_file(os.path.join(base_dir, 'shapefiles', 'tl_2019_08_county.shp'))
 cdot = gpd.read_file(os.path.join(base_dir, 'shapefiles', 'MaintenanceSections.shp')).set_crs(epsg=26913)
 cdot = cdot.to_crs(epsg=32662)
 cdot_bounds = cdot.total_bounds
