@@ -2,7 +2,7 @@ name: Run Python Script Daily
 
 on:
   schedule:
-    - cron: '0 12 30 * *'  # Runs daily at 12:30 UTC (Adjust as needed)
+    - cron: '30 12 * * *'  # Runs daily at 14:00 UTC (change as needed)
   workflow_dispatch:  # Allows manual execution
 
 jobs:
@@ -20,7 +20,11 @@ jobs:
 
       - name: Install dependencies (if any)
         run: |
-          pip install -r requirements.txt || true  # Skip if no dependencies
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Run Python script
-        run: python daily_accum_map.py
+      - name: Run Python script with secrets
+        env:
+          GOOGLE_EMAIL: ${{ secrets.GOOGLE_EMAIL }}
+          GOOGLE_PASSWORD: ${{ secrets.GOOGLE_PASSWORD }}
+          EMAIL_RECIPIENTS: ${{ secrets.EMAIL_RECIPIENTS }}
+        run: python your_script.py
