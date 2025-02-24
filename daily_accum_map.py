@@ -209,7 +209,7 @@ fig.text(0.028, 0.105, 'https://https://www.nohrsc.noaa.gov/snowfall_v2/', fonts
 fig.text(0.875, 0.105, 'NWS Gridded Snowfall Analysis', fontsize=94, ha='center')
 fig.text(0.028, 0.92, f'Valid: 5am {yesterdayst} - 5am {todayst}', fontsize=85)
 fig.figimage(cdotlogo, 5800, 6080, zorder=35)
-path = f'C:/Users/eckermanbe/Desktop/Python/24houraccum_{todaystr}.png'
+path = os.path.join(base_dir, 'daily_file', '24houraccum_{todaystr}.png')
 plt.savefig(path, bbox_inches='tight', pad_inches=0.01)
 
 
