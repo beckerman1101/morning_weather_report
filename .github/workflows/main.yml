@@ -8,7 +8,7 @@ on:
 jobs:
   run-script:
     runs-on: windows-latest  # Use Windows-based runner
-
+    environment: main
     steps:
       # Step 1: Checkout the repository
       - name: Checkout repository
