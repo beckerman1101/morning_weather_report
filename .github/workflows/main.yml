@@ -44,6 +44,10 @@ jobs:
           git commit -m "Add daily snowfall PNG file"
           git push
         continue-on-error: true  # Avoid failure if no changes exist
+      - name: Set UTF-8 Encoding
+        run: |
+          chcp 65001
+          echo "PYTHONIOENCODING=utf-8" >> $GITHUB_ENV
 
       # Step 7: Debug step - Print environment variables (without exposing secrets)
       - name: Debug Environment Variables
