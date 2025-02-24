@@ -64,8 +64,8 @@ co_bounds = [-109.05,-102.05,37,41]
 x = .15
 
 #Placefiles for counties, interstates, state highways, and manipulating the regions shapefile to plot properly
-counties = gpd.read_file('C:/Users/eckermanbe/Desktop/Python/tl_2019_08_county.shx')
-cdot = gpd.read_file('C:/Users/eckermanbe/Desktop/Python/MaintenanceSections.shp').set_crs(epsg=26913)
+counties = gpd.read_file(os.path.join(base_dir, 'shapefiles', 'tl_2019_08_county_shp'))
+cdot = gpd.read_file(os.path.join(base_dir, 'shapefiles', 'MaintenanceSections.shp')).set_crs(epsg=26913)
 cdot = cdot.to_crs(epsg=32662)
 cdot_bounds = cdot.total_bounds
 x_scale = (co_bounds[1]-co_bounds[0])/(cdot_bounds[2]-cdot_bounds[0])
@@ -75,8 +75,8 @@ cdot_bounds2 = cdot.total_bounds
 lx = cdot_bounds2[0]
 ly = cdot_bounds2[1]
 cdot = cdot.translate(xoff=co_bounds[0]-lx, yoff=co_bounds[2]-ly)
-sh = gpd.read_file('C:/Users/eckermanbe/Desktop/Python/tl_2021_08_prisecroads.shp')
-interstates = gpd.read_file('C:/Users/eckermanbe/Desktop/Python/us_interstate_highways.shp')
+sh = gpd.read_file(os.path.join(base_dir, 'shapefiles', 'tl_2021_08_prisecroads.shp'))
+interstates = gpd.read_file(os.path.join(base_dir, 'shapefiles', 'us_interstate_highways.shp'))
 
 
 # In[3]:
