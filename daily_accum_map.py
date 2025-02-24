@@ -164,7 +164,7 @@ cbar.ax.tick_params(labelsize=90, pad=20)
 
 ##Process and plot point data: changes can be made to locations, always filters data below 0.5"
 
-table = pd.read_csv('C:/Users/eckermanbe/Desktop/Python/map_locations.csv')
+table = pd.read_csv(os.path.join(base_dir, 'map_locations.csv'))
 lats = []
 lons = []
 vals = []
