@@ -37,7 +37,7 @@ def send_email_with_attachment(sender_email, receiver_emails, subject, body, att
     # Send the email
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-            server.login(sender_email, f"{GOOLE_PASSWORD}")  # Use an app password if 2FA is enabled
+            server.login(sender_email, f"{GOOGLE_PASSWORD}")  # Use an app password if 2FA is enabled
             server.sendmail(sender_email, receiver_emails, msg.as_string())
             print(f'Email sent successfully to: {", ".join(receiver_emails)} with attachment: {attachment_file_path}')
     except Exception as e:
