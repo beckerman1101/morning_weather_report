@@ -22,15 +22,18 @@ jobs:
 
       # Step 3: Upgrade pip to the latest version
       - name: Upgrade pip
-        run: python -m pip install --upgrade pip
+        run: |
+          python -m pip install --upgrade pip
 
       # Step 4: Install dependencies from requirements.txt
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
 
       # Step 5: Run the Python script (generate PNG file)
       - name: Run Python script
-        run: python daily_accum_map.py  # This script should generate the PNG file
+        run: |
+          python daily_accum_map.py  # Run the script that generates the PNG file
 
       # Step 6: Commit and push the generated PNG file
       - name: Commit and push PNG file
@@ -38,18 +41,27 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add daily_file/*.png
-          git commit -m "Add daily snowfall PNG file" || echo "No changes to commit"
+          git commit -m "Add daily snowfall PNG file"
           git push
-        continue-on-error: true  # Avoid failure if no new PNG is created
+        continue-on-error: true  # Avoid failure if no changes exist
 
+      # Step 7: Debug step - Print environment variables (without exposing secrets)
+      - name: Debug Environment Variables
+        shell: bash
+        run: |
+          echo "GOOGLE_EMAIL is set? [${{ secrets.GOOGLE_EMAIL != '' }}]"
+          echo "GOOGLE_PASSWORD is set? [${{ secrets.GOOGLE_APP_PASSWORD != '' }}]"
+          echo "EMAIL_RECIPIENTS is set? [${{ secrets.EMAIL_RECIPIENTS != '' }}]"
+
+      # Step 8: Send email with the generated PNG attachment
       - name: Send Email with PNG Attachment
+        shell: bash  # Ensure Bash is used to avoid PowerShell syntax issues
         env:
           GOOGLE_EMAIL: ${{ secrets.GOOGLE_EMAIL }}
           GOOGLE_PASSWORD: ${{ secrets.GOOGLE_APP_PASSWORD }}
           EMAIL_RECIPIENTS: ${{ secrets.EMAIL_RECIPIENTS }}
         run: |
-          $env:GOOGLE_EMAIL="${{ secrets.GOOGLE_EMAIL }}"
-          $env:GOOGLE_PASSWORD="${{ secrets.GOOGLE_APP_PASSWORD }}"
-          $env:EMAIL_RECIPIENTS="${{ secrets.EMAIL_RECIPIENTS }}"
-          python send_email.py
-
+          echo "GOOGLE_EMAIL=${GOOGLE_EMAIL}" >> $GITHUB_ENV
+          echo "GOOGLE_PASSWORD=${GOOGLE_PASSWORD}" >> $GITHUB_ENV
+          echo "EMAIL_RECIPIENTS=${EMAIL_RECIPIENTS}" >> $GITHUB_ENV
+          python send_email.py  # Runs after setting environment variables
