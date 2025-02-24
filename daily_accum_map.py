@@ -109,7 +109,7 @@ yesterdayst = yesterday.strftime('%a %m/%d')
 todaystr = today.strftime('%Y%m%d')
 
 url = f"https://www.nohrsc.noaa.gov/snowfall_v2/data/202502/sfav2_CONUS_24h_{todaystr}12.nc"
-output_dir = os.path.join(base_dir, 'daily_files')
+output_dir = os.path.join(base_dir, 'daily_file')
 output_file = os.path.join(output_dir, f"{todaystr}_file.nc")
 response = requests.get(url, stream=True)
 with open(output_file, "wb") as file:
