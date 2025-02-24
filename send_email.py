@@ -23,10 +23,6 @@ email = os.getenv("GOOGLE_EMAIL")
 pw = os.getenv("GOOGLE_PASSWORD")
 recipients = os.getenv("EMAIL_RECIPIENTS")
 
-GOOGLE_EMAIL = os.getenv("GOOGLE_EMAIL")
-GOOGLE_PASSWORD = os.getenv("GOOGLE_PASSWORD")
-EMAIL_RECIPIENTS = os.getenv("EMAIL_RECIPIENTS")
-
 if not GOOGLE_EMAIL:
     print("❌ GOOGLE_EMAIL is missing!")
 if not GOOGLE_PASSWORD:
