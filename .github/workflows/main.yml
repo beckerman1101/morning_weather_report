@@ -28,12 +28,6 @@ jobs:
           .\venv\Scripts\activate  # Activate the virtual environment
           python -m pip install --upgrade pip
 
-      - name: Install system dependencies
-        run: |
-          # Install dependencies for aiobotocore (and others if needed)
-          choco install python2  # Some packages might require an older version of Python
-          choco install mingw
-
       - name: Install dependencies
         run: |
           .\venv\Scripts\activate  # Activate the virtual environment
