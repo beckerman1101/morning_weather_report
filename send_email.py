@@ -4,7 +4,19 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
+import sys
 import os
+import codecs
+
+# Ensure UTF-8 encoding
+sys.stdout.reconfigure(encoding='utf-8')  # For print statements
+sys.stdin.reconfigure(encoding='utf-8')   # If using input
+sys.stderr.reconfigure(encoding='utf-8')  # For error messages
+
+# Force UTF-8 for environment
+os.environ["PYTHONIOENCODING"] = "utf-8"
+os.environ["LANG"] = "en_US.UTF-8"
+
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 email = os.getenv("GOOGLE_EMAIL")
