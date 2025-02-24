@@ -21,7 +21,7 @@ httplib2==0.22.0
 ipython==8.12.3
 jsonpointer==2.1
 matplotlib==3.10.0
-numpy==2.2.3
+numpy==1.21.6
 oauthlib==3.2.2
 pandas==2.2.3
 paramiko==3.5.1
