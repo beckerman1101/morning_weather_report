@@ -1,7 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
 
 
 #Python packages
@@ -261,7 +257,7 @@ def send_email_with_attachment(sender_email, receiver_emails, subject, body, att
 
 # Example usage
 sender_email = f"{GOOGLE_EMAIL}"
-receiver_emails = [f"{EMAIL_RECIPIENTS}"]  # Add multiple emails in a list
+receiver_emails = EMAIL_RECIPIENTS  # Add multiple emails in a list
 subject = "24-Hour Snowfall Report"
 body = "This email is automated. Attached is the report for snowfall statewide in the past 24 hours. Data is preliminary and has not been refined for quality control."
 attachment_file_path = path  # Make sure the path is correct
