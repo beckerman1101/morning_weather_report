@@ -162,33 +162,27 @@ cbar.ax.tick_params(labelsize=90, pad=20)
 ##Process and plot point data: changes can be made to locations, always filters data below 0.5"
 
 table = pd.read_csv(os.path.join(base_dir, 'map_locations.csv'))
-# Convert longitude to 0-360 range
-table['lon'] = 360 + table['lon']
 
-# Create KDTree from wind lat/lon values
-snow_lats_lons = np.vstack([df['lat'].values.ravel(), df['lon'].values.ravel()]).T
-kdtree = cKDTree(snow_lats_lons)
-
-# Query KDTree for nearest wind and snow data points
-coords = np.vstack([table['lat'].values, table['lon'].values]).T
-dist, index = kdtree.query(coords)
-
-# Extract wind and snow values for each location
-# Ensure correct access to the wind and snow data arrays using the right index
-# Indexing assumes 'y' and 'x' dimensions are present after stacking
-
-# Ensure we extract the right `y` and `x` indices and handle them properly
-snow_vals = df.isel(y=index // snow.shape[1], x=index % snow.shape[1]).values.max(axis=1)
-
-# Create output DataFrame with both wind and snow values
-
-log = pd.DataFrame({'lat':lats, 'lon':lons, 'snow':snow_vals})
+lats = []
+lons = []
+vals = []
+for i in tqdm.tqdm(range(len(table))):
+    lat = []
+    lon = []
+    a = table.loc[i].lat
+    b = table.loc[i].lon
+    lat.append(a)
+    lon.append(b)
+    val = df.sel(lat=a, method='nearest').sel(lon=b, method='nearest').values.max()
+    lats.append(lat[0])
+    lons.append(lon[0])
+    vals.append(val)
+log = pd.DataFrame({'lat':lats, 'lon':lons, 'snow':vals})
 point_snow = log[log['snow'] >= 0.5].copy()
 point_snow['snow'] = point_snow['snow'].round().astype(int)
 ax.scatter(point_snow['lon'], point_snow['lat'], c=point_snow['snow'], cmap=black_cmap, s=15000, zorder=25, edgecolors='black', transform=ccrs.PlateCarree())
 for i, row in point_snow.iterrows():
     ax.text(row['lon'], row['lat'], f'{int(row["snow"])}"', fontsize=75, ha='center', va='center', zorder=30, color='white', transform=ccrs.PlateCarree(), **font1)
-
 
 ## Plotting Highway logos
 
