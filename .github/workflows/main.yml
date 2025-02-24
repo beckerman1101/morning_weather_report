@@ -2,7 +2,7 @@ name: Run Python Script Daily
 
 on:
   schedule:
-    - cron: '30 12 * * *'  # Runs daily at 14:00 UTC (change as needed)
+    - cron: '30 12 * * *'  # Runs daily at 12:30 UTC
   workflow_dispatch:  # Allows manual execution
 
 jobs:
@@ -16,11 +16,20 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'  # Use your required version
+          python-version: '3.x'
 
-      - name: Install dependencies (if any)
+      - name: Upgrade pip
         run: |
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          python -m pip install --upgrade pip
+
+      - name: Install system dependencies (if needed)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libssl-dev libffi-dev python3-dev
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt  # Or list individual packages like `numpy`, `geopandas`, etc.
 
       - name: Run Python script with secrets
         env:
