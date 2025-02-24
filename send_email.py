@@ -51,7 +51,4 @@ subject = "24-Hour Snowfall Report"
 body = "This email is automated. Attached is the report for snowfall statewide in the past 24 hours. Data is preliminary and has not been refined for quality control."
 attachment_file_path = path  # Make sure the path is correct
 
-#send_email_with_attachment(sender_email, receiver_emails, subject, body, attachment_file_path)
-
-print(f"GOOGLE_EMAIL: {email}")  # Don't print the password for security reasons
-print(f"EMAIL_RECIPIENTS: {email_recipients}")
+send_email_with_attachment(sender_email, receiver_emails, subject, body, attachment_file_path)
