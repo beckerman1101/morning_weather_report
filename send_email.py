@@ -30,32 +30,38 @@ todaystr = today.strftime('%Y%m%d')
 path = os.path.join(base_dir, 'daily_file', f'24houraccum_{todaystr}.png')
 
 def send_email_with_attachment(sender_email, receiver_emails, subject, body, attachment_file_path):
-    # Create the email message
     msg = MIMEMultipart()
     msg['From'] = sender_email
     msg['To'] = ", ".join(receiver_emails)  # Convert list to comma-separated string
     msg['Subject'] = subject
 
-    # Attach the body of the email
-    msg.attach(MIMEText(body, 'plain'))
+    # 🔹 FIX 1: Encode email body as UTF-8
+    msg.attach(MIMEText(body, 'plain', 'utf-8'))
 
-    # Open the attachment file in binary mode
-    with open(attachment_file_path, 'rb') as attachment_file:
-        # Attach the file to the email
-        part = MIMEBase('application', 'octet-stream')
-        part.set_payload(attachment_file.read())
-        encoders.encode_base64(part)  # Encode the attachment
-        part.add_header('Content-Disposition', f'attachment; filename={attachment_file_path.split("/")[-1]}')
-        msg.attach(part)
+    # Attach the file
+    try:
+        with open(attachment_file_path, 'rb') as attachment_file:
+            part = MIMEBase('application', 'octet-stream')
+            part.set_payload(attachment_file.read())
+            encoders.encode_base64(part)  
+            part.add_header('Content-Disposition', f'attachment; filename="{os.path.basename(attachment_file_path)}"')
+            msg.attach(part)
+    except Exception as e:
+        print(f"Error attaching file: {e}")
 
     # Send the email
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-            server.login(sender_email, f"{pw}")  # Use an app password if 2FA is enabled
-            server.sendmail(sender_email, receiver_emails, msg.as_string())
-            print(f'Email sent successfully to: {", ".join(receiver_emails)} with attachment: {attachment_file_path}')
+            server.login(sender_email, os.getenv("GOOGLE_PASSWORD"))  
+            
+            # 🔹 FIX 2: Encode the entire email as UTF-8 before sending
+            server.sendmail(sender_email, receiver_emails, msg.as_string().encode('utf-8'))
+
+        print(f'Email sent successfully to: {", ".join(receiver_emails)}')
+
     except Exception as e:
         print(f"Failed to send email: {e}")
+
 
 #recipients = recipients.split(",")
 # Example usage
