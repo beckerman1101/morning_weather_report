@@ -42,6 +42,13 @@ jobs:
           git push
         continue-on-error: true  # Avoid failure if no new PNG is created
 
+      - name: Set Environment Variables
+        run: |
+          echo "Setting Environment Variables..."
+          echo "GOOGLE_EMAIL=${{ secrets.GOOGLE_EMAIL }}" >> $GITHUB_ENV
+          echo "GOOGLE_PASSWORD=${{ secrets.GOOGLE_APP_PASSWORD }}" >> $GITHUB_ENV
+          echo "EMAIL_RECIPIENTS=${{ secrets.EMAIL_RECIPIENTS }}" >> $GITHUB_ENV
+
       # Step 7: Debug secrets (Check if they exist, without exposing them)
       - name: Debug Secrets
         run: |
@@ -52,7 +59,4 @@ jobs:
       # Step 8: Send Email with PNG Attachment
       - name: Send Email with PNG Attachment
         run: |
-          export GOOGLE_EMAIL="${{ secrets.GOOGLE_EMAIL }}"
-          export GOOGLE_PASSWORD="${{ secrets.GOOGLE_APP_PASSWORD }}"
-          export EMAIL_RECIPIENTS="${{ secrets.EMAIL_RECIPIENTS }}"
           python send_email.py
