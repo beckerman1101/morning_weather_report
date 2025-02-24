@@ -11,6 +11,20 @@ email = os.getenv("GOOGLE_EMAIL")
 pw = os.getenv("GOOGLE_PASSWORD")
 recipients = os.getenv("EMAIL_RECIPIENTS")
 
+GOOGLE_EMAIL = os.getenv("GOOGLE_EMAIL")
+GOOGLE_PASSWORD = os.getenv("GOOGLE_PASSWORD")
+EMAIL_RECIPIENTS = os.getenv("EMAIL_RECIPIENTS")
+
+if not GOOGLE_EMAIL:
+    print("❌ GOOGLE_EMAIL is missing!")
+if not GOOGLE_PASSWORD:
+    print("❌ GOOGLE_PASSWORD is missing!")
+if not EMAIL_RECIPIENTS:
+    print("❌ EMAIL_RECIPIENTS is missing!")
+
+recipients = EMAIL_RECIPIENTS.split(",") if EMAIL_RECIPIENTS else []
+
+
 today = datetime.today()
 todaystr = today.strftime('%Y%m%d')
 path = os.path.join(base_dir, 'daily_file', f'24houraccum_{todaystr}.png')
