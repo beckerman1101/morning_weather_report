@@ -140,9 +140,9 @@ df_co = df.where(df.lat>=co_bounds[2], drop=True).where(df.lat<=co_bounds[3], dr
 latlen = len(df_co.lat)
 lonlen = len(df_co.lon)
 inter_factor = 8
-target_lat = np.linspace(co_bounds[2], co_bounds[3], latlen*inter_factor)  # Double the resolution of latitudes
-target_lon = np.linspace(co_bounds[0], co_bounds[1], lonlen*inter_factor)  # Double the resolution of longitudes
-df = df_co['Data'].interp(lat=target_lat, lon=target_lon, method='linear')    #Add borders, highways to the map
+target_lat = np.linspace(co_bounds[2], co_bounds[3], latlen*inter_factor)  
+target_lon = np.linspace(co_bounds[0], co_bounds[1], lonlen*inter_factor)  
+df = df_co['Data'].interp(lat=target_lat, lon=target_lon, method='linear')    
 
 
 ## Plot highways, counties, CDOT regions
@@ -165,21 +165,27 @@ cbar.ax.tick_params(labelsize=90, pad=20)
 ##Process and plot point data: changes can be made to locations, always filters data below 0.5"
 
 table = pd.read_csv(os.path.join(base_dir, 'map_locations.csv'))
-lats = []
-lons = []
-vals = []
-for i in tqdm.tqdm(range(len(table))):
-    lat = []
-    lon = []
-    a = table.loc[i].lat
-    b = table.loc[i].lon
-    lat.append(a)
-    lon.append(b)
-    val = df.sel(lat=a, method='nearest').sel(lon=b, method='nearest').values.max()
-    lats.append(lat[0])
-    lons.append(lon[0])
-    vals.append(val)
-log = pd.DataFrame({'lat':lats, 'lon':lons, 'snow':vals})
+# Convert longitude to 0-360 range
+table['lon'] = 360 + table['lon']
+
+# Create KDTree from wind lat/lon values
+snow_lats_lons = np.vstack([df['latitude'].values.ravel(), df['longitude'].values.ravel()]).T
+kdtree = cKDTree(snow_lats_lons)
+
+# Query KDTree for nearest wind and snow data points
+coords = np.vstack([table['lat'].values, table['lon'].values]).T
+dist, index = kdtree.query(coords)
+
+# Extract wind and snow values for each location
+# Ensure correct access to the wind and snow data arrays using the right index
+# Indexing assumes 'y' and 'x' dimensions are present after stacking
+
+# Ensure we extract the right `y` and `x` indices and handle them properly
+snow_vals = df.isel(y=index // snow.shape[1], x=index % snow.shape[1]).values.max(axis=1)
+
+# Create output DataFrame with both wind and snow values
+
+log = pd.DataFrame({'lat':lats, 'lon':lons, 'snow':snow_vals})
 point_snow = log[log['snow'] >= 0.5].copy()
 point_snow['snow'] = point_snow['snow'].round().astype(int)
 ax.scatter(point_snow['lon'], point_snow['lat'], c=point_snow['snow'], cmap=black_cmap, s=15000, zorder=25, edgecolors='black', transform=ccrs.PlateCarree())
