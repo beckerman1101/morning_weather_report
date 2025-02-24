@@ -7,9 +7,9 @@ from email import encoders
 import os
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
-GOOGLE_EMAIL = os.getenv("GOOGLE_EMAIL")
-GOOGLE_PASSWORD = os.getenv("GOOGLE_PASSWORD")
-EMAIL_RECIPIENTS = os.getenv("EMAIL_RECIPIENTS")
+email = os.getenv("GOOGLE_EMAIL")
+pw = os.getenv("GOOGLE_PASSWORD")
+email_recipients = os.getenv("EMAIL_RECIPIENTS")
 
 today = datetime.today()
 todaystr = today.strftime('%Y%m%d')
@@ -37,7 +37,7 @@ def send_email_with_attachment(sender_email, receiver_emails, subject, body, att
     # Send the email
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-            server.login(sender_email, f"{GOOGLE_PASSWORD}")  # Use an app password if 2FA is enabled
+            server.login(sender_email, f"{pw}")  # Use an app password if 2FA is enabled
             server.sendmail(sender_email, receiver_emails, msg.as_string())
             print(f'Email sent successfully to: {", ".join(receiver_emails)} with attachment: {attachment_file_path}')
     except Exception as e:
@@ -45,13 +45,13 @@ def send_email_with_attachment(sender_email, receiver_emails, subject, body, att
 
 #recipients = EMAIL_RECIPIENTS.split(",")
 # Example usage
-sender_email = f"{GOOGLE_EMAIL}"
-receiver_emails = f"{EMAIL_RECIPIENTS}"  # Add multiple emails in a list
+sender_email = f"{email}"
+receiver_emails = f"{email_recipients}"  # Add multiple emails in a list
 subject = "24-Hour Snowfall Report"
 body = "This email is automated. Attached is the report for snowfall statewide in the past 24 hours. Data is preliminary and has not been refined for quality control."
 attachment_file_path = path  # Make sure the path is correct
 
 #send_email_with_attachment(sender_email, receiver_emails, subject, body, attachment_file_path)
 
-print(f"GOOGLE_EMAIL: {GOOGLE_EMAIL}")  # Don't print the password for security reasons
-print(f"EMAIL_RECIPIENTS: {EMAIL_RECIPIENTS}")
+print(f"GOOGLE_EMAIL: {email}")  # Don't print the password for security reasons
+print(f"EMAIL_RECIPIENTS: {email_recipients}")
