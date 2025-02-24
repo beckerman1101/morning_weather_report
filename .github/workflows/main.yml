@@ -49,13 +49,6 @@ jobs:
           echo "GOOGLE_PASSWORD=${{ secrets.GOOGLE_APP_PASSWORD }}" >> $GITHUB_ENV
           echo "EMAIL_RECIPIENTS=${{ secrets.EMAIL_RECIPIENTS }}" >> $GITHUB_ENV
 
-      # Step 7: Debug secrets (Check if they exist, without exposing them)
-      - name: Debug Secrets
-        run: |
-          if [ -z "${{ secrets.GOOGLE_EMAIL }}" ]; then echo "❌ GOOGLE_EMAIL is missing"; else echo "✅ GOOGLE_EMAIL is set"; fi
-          if [ -z "${{ secrets.GOOGLE_APP_PASSWORD }}" ]; then echo "❌ GOOGLE_APP_PASSWORD is missing"; else echo "✅ GOOGLE_APP_PASSWORD is set"; fi
-          if [ -z "${{ secrets.EMAIL_RECIPIENTS }}" ]; then echo "❌ EMAIL_RECIPIENTS is missing"; else echo "✅ EMAIL_RECIPIENTS is set"; fi
-
       # Step 8: Send Email with PNG Attachment
       - name: Send Email with PNG Attachment
         run: |
