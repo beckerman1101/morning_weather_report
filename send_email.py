@@ -22,7 +22,7 @@ if not GOOGLE_PASSWORD:
 if not EMAIL_RECIPIENTS:
     print("❌ EMAIL_RECIPIENTS is missing!")
 
-recipients = EMAIL_RECIPIENTS.split(",") if EMAIL_RECIPIENTS else []
+#recipients = EMAIL_RECIPIENTS.split(",") if EMAIL_RECIPIENTS else []
 
 
 today = datetime.today()
