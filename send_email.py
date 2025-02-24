@@ -9,7 +9,7 @@ import os
 base_dir = os.path.dirname(os.path.abspath(__file__))
 email = os.getenv("GOOGLE_EMAIL")
 pw = os.getenv("GOOGLE_PASSWORD")
-email_recipients = os.getenv("EMAIL_RECIPIENTS")
+recipients = os.getenv("EMAIL_RECIPIENTS")
 
 today = datetime.today()
 todaystr = today.strftime('%Y%m%d')
@@ -43,10 +43,10 @@ def send_email_with_attachment(sender_email, receiver_emails, subject, body, att
     except Exception as e:
         print(f"Failed to send email: {e}")
 
-#recipients = EMAIL_RECIPIENTS.split(",")
+#recipients = recipients.split(",")
 # Example usage
 sender_email = f"{email}"
-receiver_emails = f"{email_recipients}"  # Add multiple emails in a list
+receiver_emails = f"{recipients}"  # Add multiple emails in a list
 subject = "24-Hour Snowfall Report"
 body = "This email is automated. Attached is the report for snowfall statewide in the past 24 hours. Data is preliminary and has not been refined for quality control."
 attachment_file_path = path  # Make sure the path is correct
