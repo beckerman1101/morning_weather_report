@@ -30,11 +30,30 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      # Step 5: Run the Python script
+      # Step 5: Run the Python script (generate PNG file)
       - name: Run Python script
         env:
           GOOGLE_EMAIL: ${{ secrets.GOOGLE_EMAIL }}
           GOOGLE_PASSWORD: ${{ secrets.GOOGLE_PASSWORD }}
           EMAIL_RECIPIENTS: ${{ secrets.EMAIL_RECIPIENTS }}
         run: |
-          python daily_accum_map.py  # Run your script
+          python daily_accum_map.py  # Run the script that generates the PNG file
+
+      # Step 6: Commit and push the generated PNG file
+      - name: Commit and push PNG file
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add daily_file/*.png
+          git commit -m "Add daily snowfall PNG file"
+          git push
+        continue-on-error: true  # Avoid failure if no changes exist
+
+      # Step 7: Send email with the generated PNG attachment
+      - name: Send Email with PNG Attachment
+        env:
+          GOOGLE_EMAIL: ${{ secrets.GOOGLE_EMAIL }}
+          GOOGLE_PASSWORD: ${{ secrets.GOOGLE_PASSWORD }}
+          EMAIL_RECIPIENTS: ${{ secrets.EMAIL_RECIPIENTS }}
+        run: |
+          python send_email.py  # This script should handle sending the email with the attachment
