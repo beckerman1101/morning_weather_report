@@ -7,7 +7,7 @@ on:
 
 jobs:
   run-script:
-    runs-on: windows-latest  # You can switch to 'windows-latest' if needed
+    runs-on: windows-latest  # Use Windows-based runner
 
     steps:
       - name: Checkout repository
@@ -21,21 +21,23 @@ jobs:
       - name: Create and activate virtual environment
         run: |
           python -m venv venv  # Create a virtual environment in the 'venv' folder
-          venv\Scripts\activate
-      
+          .\venv\Scripts\activate  # Activate the virtual environment (Windows)
+
       - name: Upgrade pip
         run: |
-          venv/bin/activate  # Activate the virtual environment
+          .\venv\Scripts\activate  # Activate the virtual environment
           python -m pip install --upgrade pip
 
       - name: Install dependencies
         run: |
-          venv/bin/activate  # Activate the virtual environment
+          .\venv\Scripts\activate  # Activate the virtual environment
           pip install -r requirements.txt  # Install the required packages
 
-      - name: Run Python script with secrets
+      - name: Run Python script
         env:
           GOOGLE_EMAIL: ${{ secrets.GOOGLE_EMAIL }}
           GOOGLE_PASSWORD: ${{ secrets.GOOGLE_PASSWORD }}
           EMAIL_RECIPIENTS: ${{ secrets.EMAIL_RECIPIENTS }}
-        run: python daily_accum_map.py
+        run: |
+          .\venv\Scripts\activate  # Activate the virtual environment
+          python daily_accum_map.py  # Run the script
