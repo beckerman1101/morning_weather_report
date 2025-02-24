@@ -32,10 +32,6 @@ jobs:
 
       # Step 5: Run the Python script (generate PNG file)
       - name: Run Python script
-        env:
-          GOOGLE_EMAIL: ${{ secrets.GOOGLE_EMAIL }}
-          GOOGLE_PASSWORD: ${{ secrets.GOOGLE_PASSWORD }}
-          EMAIL_RECIPIENTS: ${{ secrets.EMAIL_RECIPIENTS }}
         run: |
           python daily_accum_map.py  # Run the script that generates the PNG file
 
