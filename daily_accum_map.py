@@ -166,7 +166,7 @@ table = pd.read_csv(os.path.join(base_dir, 'map_locations.csv'))
 table['lon'] = 360 + table['lon']
 
 # Create KDTree from wind lat/lon values
-snow_lats_lons = np.vstack([df['latitude'].values.ravel(), df['longitude'].values.ravel()]).T
+snow_lats_lons = np.vstack([df['lat'].values.ravel(), df['lon'].values.ravel()]).T
 kdtree = cKDTree(snow_lats_lons)
 
 # Query KDTree for nearest wind and snow data points
