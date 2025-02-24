@@ -47,9 +47,8 @@ jobs:
 
       # Step 7: Send email with the generated PNG attachment
       - name: Send Email with PNG Attachment
-        env:
-          GOOGLE_EMAIL: ${{ secrets.GOOGLE_EMAIL }}
-          GOOGLE_PASSWORD: ${{ secrets.GOOGLE_APP_PASSWORD }}
-          EMAIL_RECIPIENTS: ${{ secrets.EMAIL_RECIPIENTS }}
         run: |
+          export GOOGLE_EMAIL="${{ secrets.GOOGLE_EMAIL }}"
+          export GOOGLE_PASSWORD="${{ secrets.GOOGLE_APP_PASSWORD }}"
+          export EMAIL_RECIPIENTS="${{ secrets.EMAIL_RECIPIENTS }}"
           python send_email.py  # This script should handle sending the email with the attachment
