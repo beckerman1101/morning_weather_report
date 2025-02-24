@@ -27,6 +27,7 @@ from zoneinfo import ZoneInfo
 import zipfile
 import os
 
+base_dir = os.path.dirname(os.path.abspath(__file__))
 
 # In[2]:
 GOOGLE_EMAIL = os.getenv("GOOGLE_EMAIL")
@@ -37,18 +38,26 @@ EMAIL_RECIPIENTS = os.getenv("EMAIL_RECIPIENTS")
 
 font1 = {'fontname':'Trebuchet MS', 'weight':'bold'}
 font2 = {'fontname':'Trebuchet MS'}
-#font3 = {'fontname':'Franklin Gothic Medium'}
 
 #Logos
-cdotlogo = mpimg.imread('C:/Users/eckermanbe/Desktop/Python/image (1).png')
-us160 = mpimg.imread('C:/Users/eckermanbe/Desktop/Python/US_160.png')
-us550 = mpimg.imread('C:/Users/eckermanbe/Desktop/Python/US_550.png')
-us50 = mpimg.imread('C:/Users/eckermanbe/Desktop/Python/US_50.png')
-us40 = mpimg.imread('C:/Users/eckermanbe/Desktop/Python/US_40.png')
-us285 = mpimg.imread('C:/Users/eckermanbe/Desktop/Python/US_285.png')
-i25 = mpimg.imread('C:/Users/eckermanbe/Desktop/Python/I-25.png')
-i70 = mpimg.imread('C:/Users/eckermanbe/Desktop/Python/I-70.png')
-i76 = mpimg.imread('C:/Users/eckermanbe/Desktop/Python/I-76.png')
+cdot_path = os.path.join(base_dir, 'images', 'image (1).png')
+us160_path = os.path.join(base_dir, 'images', 'US_160.png')
+us550_path = os.path.join(base_dir, 'images', 'US_550.png')
+us50_path = os.path.join(base_dir, 'images', 'US_50.png')
+us40_path = os.path.join(base_dir, 'images', 'US_40.png')
+us285_path = os.path.join(base_dir, 'images', 'US_285.png')
+i25_path = os.path.join(base_dir, 'images', 'I-25.png')
+i70_path = os.path.join(base_dir, 'images', 'I-70.png')
+i76_path = os.path.join(base_dir, 'images', 'I-76.png')
+cdotlogo = mpimg.imread(cdot_path)
+us160 = mpimg.imread(us160_path)
+us550 = mpimg.imread(us550_path)
+us50 = mpimg.imread(us50_path)
+us40 = mpimg.imread(us40_path)
+us285 = mpimg.imread(us285_path)
+i25 = mpimg.imread(i25_path)
+i70 = mpimg.imread(i70_path)
+i76 = mpimg.imread(i76_path)
 
 #Colorado bounds and padding
 co_bounds = [-109.05,-102.05,37,41]
