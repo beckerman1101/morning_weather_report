@@ -48,6 +48,12 @@ jobs:
           echo "GOOGLE_EMAIL=${{ secrets.GOOGLE_EMAIL }}" >> $GITHUB_ENV
           echo "GOOGLE_PASSWORD=${{ secrets.GOOGLE_APP_PASSWORD }}" >> $GITHUB_ENV
           echo "EMAIL_RECIPIENTS=${{ secrets.EMAIL_RECIPIENTS }}" >> $GITHUB_ENV
+      - name: Debug Secrets
+        run: |
+          echo "Checking Secrets..."
+            if [ -z "${{ secrets.GOOGLE_EMAIL }}" ]; then echo "❌ GOOGLE_EMAIL is MISSING"; else echo "✅ GOOGLE_EMAIL is SET"; fi
+            if [ -z "${{ secrets.GOOGLE_APP_PASSWORD }}" ]; then echo "❌ GOOGLE_APP_PASSWORD is MISSING"; else echo "✅ GOOGLE_APP_PASSWORD is SET"; fi
+            if [ -z "${{ secrets.EMAIL_RECIPIENTS }}" ]; then echo "❌ EMAIL_RECIPIENTS is MISSING"; else echo "✅ EMAIL_RECIPIENTS is SET"; fi
 
       # Step 8: Send Email with PNG Attachment
       - name: Send Email with PNG Attachment
