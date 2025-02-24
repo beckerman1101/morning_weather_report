@@ -1,0 +1,26 @@
+name: Run Python Script Daily
+
+on:
+  schedule:
+    - cron: '0 12 30 * *'  # Runs daily at 12:30 UTC (Adjust as needed)
+  workflow_dispatch:  # Allows manual execution
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'  # Use your required version
+
+      - name: Install dependencies (if any)
+        run: |
+          pip install -r requirements.txt || true  # Skip if no dependencies
+
+      - name: Run Python script
+        run: python daily_accum_map.py
