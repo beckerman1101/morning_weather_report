@@ -52,3 +52,6 @@ body = "This email is automated. Attached is the report for snowfall statewide i
 attachment_file_path = path  # Make sure the path is correct
 
 send_email_with_attachment(sender_email, receiver_emails, subject, body, attachment_file_path)
+
+print(f"GOOGLE_EMAIL: {GOOGLE_EMAIL}")  # Don't print the password for security reasons
+print(f"EMAIL_RECIPIENTS: {EMAIL_RECIPIENTS}")
