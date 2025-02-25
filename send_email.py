@@ -19,9 +19,9 @@ os.environ["LANG"] = "en_US.UTF-8"
 
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
-email = os.getenv("GOOGLE_EMAIL")).strip()
-pw = os.getenv("GOOGLE_PASSWORD")).strip()
-recipients = os.getenv("EMAIL_RECIPIENTS")).strip()
+email = os.getenv("GOOGLE_EMAIL").strip()
+pw = os.getenv("GOOGLE_PASSWORD").strip()
+recipients = os.getenv("EMAIL_RECIPIENTS").strip()
 
 recipients = recipients.split(",") if recipients else []
 
@@ -53,7 +53,7 @@ def send_email_with_attachment(sender_email, receiver_emails, subject, body, att
     # Send the email
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-            server.login(sender_email, pw)  
+            server.login(sender_email.as_string().encode('utf-8'), pw.as_string().encode('utf-8'))  
             
             # 🔹 FIX 2: Encode the entire email as UTF-8 before sending
             server.sendmail(sender_email, receiver_emails, msg.as_string().encode('utf-8'))
