@@ -57,7 +57,7 @@ jobs:
       - name: Run Python script
         env:
           GOOGLE_EMAIL: "${{ secrets.GOOGLE_EMAIL }}"
-          GOOGLE_PASSWORD: "${{ secrets.GOOGLE_PASSWORD }}"
+          GOOGLE_PASSWORD: "${{ secrets.GOOGLE_APP_PASSWORD }}"
           EMAIL_RECIPIENTS: "${{ secrets.EMAIL_RECIPIENTS }}"
         run: |
           python send_email.py
