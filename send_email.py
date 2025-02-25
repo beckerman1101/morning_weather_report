@@ -74,14 +74,12 @@ attachment_file_path = path  # Make sure the path is correct
 
 send_email_with_attachment(sender_email, receiver_emails, subject, body, attachment_file_path)
 
-import logging
-logging.basicConfig(level=logging.DEBUG)
-logging.debug(f"GOOGLE_EMAIL: {os.getenv('GOOGLE_EMAIL')}")
-logging.debug(f"GOOGLE_PASSWORD: {os.getenv('GOOGLE_PASSWORD')}")
-logging.debug(f"EMAIL_RECIPIENTS: {os.getenv('EMAIL_RECIPIENTS')}")
 print(email)
 print(pw)
 print(recipients)
+print(len(email))
+print(len(pw))
+print(len(recipients))
 
 
 
