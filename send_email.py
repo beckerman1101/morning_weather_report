@@ -19,9 +19,9 @@ os.environ["LANG"] = "en_US.UTF-8"
 
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
-email = os.getenv("GOOGLE_EMAIL")
-pw = os.getenv("GOOGLE_PASSWORD")
-recipients = os.getenv("EMAIL_RECIPIENTS")
+email = str(os.getenv("GOOGLE_EMAIL"))
+pw = str(os.getenv("GOOGLE_PASSWORD"))
+recipients = str(os.getenv("EMAIL_RECIPIENTS"))
 
 recipients = recipients.split(",") if recipients else []
 
