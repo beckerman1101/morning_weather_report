@@ -19,11 +19,11 @@ os.environ["LANG"] = "en_US.UTF-8"
 
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
-email = str(os.getenv("GOOGLE_EMAIL"))
-pw = str(os.getenv("GOOGLE_PASSWORD"))
-recipients = str(os.getenv("EMAIL_RECIPIENTS"))
+email = os.getenv("GOOGLE_EMAIL")).strip()
+pw = os.getenv("GOOGLE_PASSWORD")).strip()
+recipients = os.getenv("EMAIL_RECIPIENTS")).strip()
 
-#recipients = EMAIL_RECIPIENTS.split(",") if EMAIL_RECIPIENTS else []
+recipients = recipients.split(",") if recipients else []
 
 
 today = datetime.today()
@@ -74,9 +74,9 @@ attachment_file_path = path  # Make sure the path is correct
 
 send_email_with_attachment(sender_email, receiver_emails, subject, body, attachment_file_path)
 
-print(email)
+print(f"{repr(email)}")
 print(pw)
-print(recipients)
+print(f"{repr(recipients)}")
 print(len(email))
 print(len(pw))
 print(len(recipients))
