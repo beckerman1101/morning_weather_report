@@ -53,7 +53,7 @@ def send_email_with_attachment(sender_email, receiver_emails, subject, body, att
     # Send the email
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-            server.login(sender_email.as_string().encode('utf-8'), pw.as_string().encode('utf-8'))  
+            server.login(sender_email.encode('utf-8'), pw.encode('utf-8'))  
             
             # 🔹 FIX 2: Encode the entire email as UTF-8 before sending
             server.sendmail(sender_email, receiver_emails, msg.as_string().encode('utf-8'))
