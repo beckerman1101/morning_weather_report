@@ -231,9 +231,9 @@ with open(fcst_name, 'wb') as file:
     for chunk in response.iter_content(chunk_size=8192):
         file.write(chunk)
 snow_fcst = xr.open_dataset(fcst_name, engine='cfgrib', decode_timedelta=True)
+times = snow_fcst.valid_time.values
 pos1 = None
 count = 0
-
 for dt in times:
     hour = dt.astype('datetime64[h]').astype(int) % 24
     if hour == 12:
