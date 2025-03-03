@@ -116,7 +116,7 @@ x = .15
 
 counties = gpd.read_file(os.path.join(base_dir, 'shapefiles', 'tl_2019_08_county.shp'))
 cdot_path = os.path.join(base_dir, 'shapefiles', 'MaintenanceSections.shp')
-cdot = gpd.read_file(cdot_path).set_crs(epsg=26913))
+cdot = gpd.read_file(cdot_path).set_crs(epsg=26913)
 cdot = cdot.to_crs(epsg=32662)
 cdot_bounds = cdot.total_bounds
 x_scale = (co_bounds[1]-co_bounds[0])/(cdot_bounds[2]-cdot_bounds[0])
