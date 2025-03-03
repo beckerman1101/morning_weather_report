@@ -10,8 +10,6 @@ Original file is located at
 ### Installing necessary python packages
 """
 
-pip install cartopy cfgrib
-
 """### Setting up required packages
 #### This cell will ask for Drive Access
 """
@@ -56,8 +54,9 @@ from bs4 import BeautifulSoup
 import re
 import textwrap
 from google.colab import drive
-drive.mount('/content/drive')
 os.environ['SHAPE_RESTORE_SHX'] = 'YES'
+
+base_dir = os.path.dirname(os.path.abspath(__file__))
 
 """### Installing CDOT Trebuchet Font, setting up variables for today (for use in labels & filemaking)"""
 
@@ -65,10 +64,10 @@ os.environ['SHAPE_RESTORE_SHX'] = 'YES'
 
 # Not sure if adding all of them is necessary because the plot looks good, but not taking chances here
 
-treb = '/content/drive/My Drive/Morning Weather Report/TREBUC.TTF'
-trebb = '/content/drive/My Drive/Morning Weather Report/TREBUCBD.TTF'
-trebi = '/content/drive/My Drive/Morning Weather Report/TREBUCIT.TTF'
-trebbi = '/content/drive/My Drive/Morning Weather Report/TREBUCBI.TTF'
+treb = os.path.join(base_dir, 'TREBUC.TTF')
+trebb = os.path.join(base_dir, 'TREBUCBD.TTF')
+trebi = os.path.join(base_dir, 'TREBUCIT.TTF')
+trebbi = os.path.join(base_dir, 'TREBUCBI.TTF')
 fm.fontManager.addfont(treb)
 fm.fontManager.addfont(trebb)
 fm.fontManager.addfont(trebi)
@@ -97,16 +96,16 @@ todaystr
 
 # These open up the highway logos and cdot for the top of the figure. The cdot logo is a mess, see the final few lines of the notebook
 
-cdotlogo = mpimg.imread('/content/drive/My Drive/Morning Weather Report/Images/image (1).png')
-nws = mpimg.imread('/content/drive/My Drive/Morning Weather Report/Images/nwslogo.png')
-us160 = mpimg.imread('/content/drive/My Drive/Morning Weather Report/Images/US_160.png')
-us550 = mpimg.imread('/content/drive/My Drive/Morning Weather Report/Images/US_550.png')
-us50 = mpimg.imread('/content/drive/My Drive/Morning Weather Report/Images/US_50.png')
-us40 = mpimg.imread('/content/drive/My Drive/Morning Weather Report/Images/US_40.png')
-us285 = mpimg.imread('/content/drive/My Drive/Morning Weather Report/Images/US_285.png')
-i25 = mpimg.imread('/content/drive/My Drive/Morning Weather Report/Images/I-25.png')
-i70 = mpimg.imread('/content/drive/My Drive/Morning Weather Report/Images/I-70.png')
-i76 = mpimg.imread('/content/drive/My Drive/Morning Weather Report/Images/I-76.png')
+cdotlogo = mpimg.imread(os.path.join(base_dir, 'images', 'image (1).png')
+nws = mpimg.imread(os.path.join(base_dir, 'images', 'nwslogo.png')
+us160 = mpimg.imread(os.path.join(base_dir, 'images', 'US_160.png')
+us550 = mpimg.imread(os.path.join(base_dir, 'images', 'US_550.png')
+us50 = mpimg.imread(os.path.join(base_dir, 'images', 'US_50.png')
+us40 = mpimg.imread(os.path.join(base_dir, 'images', 'US_40.png')
+us285 = mpimg.imread(os.path.join(base_dir, 'images', 'US_285.png')
+i25 = mpimg.imread(os.path.join(base_dir, 'images', 'I-25.png')
+i70 = mpimg.imread(os.path.join(base_dir, 'images', 'I-70.png')
+i76 = mpimg.imread(os.path.join(base_dir, 'images', 'I-76.png')
 
 # Colorado bounds and padding for the maps. This can be adjusted if we want to scale the mapping
 co_bounds = [-109.05,-102.05,37,41]
@@ -116,8 +115,8 @@ x = .15
 # My laziness backfired on the cdot boundaries. I ignored the projection file and had to manually manipulate it, but this works
 # Don't fix what ain't broken
 
-counties = gpd.read_file('/content/drive/My Drive/Morning Weather Report/Shapefiles/tl_2019_08_county.shp')
-cdot = gpd.read_file('/content/drive/My Drive/Morning Weather Report/Shapefiles/MaintenanceSections.shp').set_crs(epsg=26913)
+counties = gpd.read_file(os.path.join(base_dir, 'shapefiles', 'tl_2019_08_county.shp')
+cdot = gpd.read_file(os.path.join(base_dir, 'shapefiles', 'MaintenanceSections.shp').set_crs(epsg=26913)
 cdot = cdot.to_crs(epsg=32662)
 cdot_bounds = cdot.total_bounds
 x_scale = (co_bounds[1]-co_bounds[0])/(cdot_bounds[2]-cdot_bounds[0])
@@ -127,8 +126,8 @@ cdot_bounds2 = cdot.total_bounds
 lx = cdot_bounds2[0]
 ly = cdot_bounds2[1]
 cdot = cdot.translate(xoff=co_bounds[0]-lx, yoff=co_bounds[2]-ly)
-sh = gpd.read_file('/content/drive/My Drive/Morning Weather Report/Shapefiles/tl_2021_08_prisecroads.shp')
-interstates = gpd.read_file('/content/drive/My Drive/Morning Weather Report/Shapefiles/us_interstate_highways.shp')
+sh = gpd.read_file(os.path.join(base_dir, 'shapefiles', 'tl_2021_08_prisecroads.shp')
+interstates = gpd.read_file(os.path.join(base_dir, 'shapefiles', 'us_interstate_highways.shp')
 
 """### Establishing colorbars and their labels for snowfall and WWA Display"""
 
@@ -193,7 +192,7 @@ afdtext = messages_list[1:]
 
 url = 'https://tgftp.nws.noaa.gov/SL.us008001/DF.sha/DC.cap/DS.WWA/current_all.tar.gz'
 downloaded_file_path = f'{todaystr}_wwa.tar.gz'
-extracted_folder = f'/content/drive/My Drive/Morning Weather Report/files/{todaystr}'
+extracted_folder = fos.path.join(base_dir, files/{todaystr}'
 if not os.path.exists(extracted_folder):
     os.makedirs(extracted_folder)
 response = requests.get(url)
@@ -225,7 +224,7 @@ co = co.reset_index(drop=True)
 # The forecast has to be processed to sum up through the next 12z step of the NDFD
 
 fcst_url = "https://tgftp.nws.noaa.gov/SL.us008001/ST.opnl/DF.gr2/DC.ndfd/AR.crrocks/VP.001-003/ds.snow.bin"
-fcst_name = f"/content/drive/My Drive/Morning Weather Report/files/{todaystr}/{todaystr}_ndfdsnow.bin"
+fcst_name = f"os.path.join(base_dir, 'daily_file', '{todaystr}/{todaystr}_ndfdsnow.bin"
 response = requests.get(fcst_url, stream=True)
 response.raise_for_status()
 with open(fcst_name, 'wb') as file:
@@ -261,7 +260,7 @@ snow_forecast = df.interp(x=new_lat, y=new_lon)
 # The accumulation data is much easier to work with, but I'm still filtering out non-Colorado data
 
 accum_url = f"https://www.nohrsc.noaa.gov/snowfall_v2/data/{mo}/sfav2_CONUS_24h_{todaystr}12.nc"
-accum_name = f"/content/drive/My Drive/Morning Weather Report/files/{todaystr}/{todaystr}_gridded.nc"
+accum_name = f"os.path.join(base_dir, 'daily_file', '{todaystr}/{todaystr}_gridded.nc"
 response = requests.get(accum_url, stream=True)
 with open(accum_name, "wb") as file:
     for chunk in response.iter_content(chunk_size=8192):
@@ -379,7 +378,7 @@ ax3.axis('off')
 # the value, so 2" will produce 1-3"
 # If 3<x<=8, the range is 4", and above 8", the range is 6"
 
-table = pd.read_csv('/content/drive/My Drive/Morning Weather Report/fcst_locations.csv')
+table = pd.read_csv(os.path.join(base_dir, fcst_locations.csv')
 lats_lons = np.vstack([snow_forecast['latitude'].values.ravel(), snow_forecast['longitude'].values.ravel()]).T
 kdtree = cKDTree(lats_lons)  # Create KDTree once
 lats, lons, vals, ranges, fcst= [], [], [], [], []
@@ -468,5 +467,5 @@ fig.suptitle(' ', x=0, y=1.07, fontsize=240, ha='left')
 fig.text(0.025, 1.004, f'Winter Weather Report: {todayst}', fontsize=200, weight='bold', style='italic')
 fig.text(0.04, 0.967, f'Valid as of {ts}', fontsize=80, weight='bold', style='italic')
 fig.figimage(cdotlogo, 6050, 4250, zorder=20)
-#plt.savefig(f"/content/drive/My Drive/Morning Weather Report/files/{todaystr}/{todaystr}_MWR.png", bbox_inches='tight')
+plt.savefig(f"os.path.join(base_dir, 'daily_file', '{todaystr}/{todaystr}_MWR.png", bbox_inches='tight')
 
