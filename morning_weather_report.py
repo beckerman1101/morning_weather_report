@@ -190,25 +190,60 @@ afdtext = messages_list[1:]
 
 # All of these queries that are ran download the file to the extracted file folder, we can keep for records
 
+import os
+import requests
+import tarfile
+import shutil
+import subprocess
+from datetime import datetime
+import geopandas as gpd
+
+# Set the necessary variables
+todaystr = datetime.now().strftime('%Y-%m-%d')
 url = 'https://tgftp.nws.noaa.gov/SL.us008001/DF.sha/DC.cap/DS.WWA/current_all.tar.gz'
 downloaded_file_path = f'{todaystr}_wwa.tar.gz'
-extracted_folder = os.path.join(base_dir, 'daily_files')
+extracted_folder = os.path.join('daily_file', todaystr)
+
+# Make sure the extracted folder exists
 if not os.path.exists(extracted_folder):
     os.makedirs(extracted_folder)
+
+# Download the .tar.gz file
 response = requests.get(url)
 with open(downloaded_file_path, 'wb') as f:
     f.write(response.content)
+
+# Extract the TAR file
 with tarfile.open(downloaded_file_path, 'r:gz') as tar:
-    tar.extractall(path=extracted_folder, filter='fully_trusted')
+    tar.extractall(path=extracted_folder)
+
+# Find the shapefile
 shapefile_path = None
 for file in os.listdir(extracted_folder):
     if file.endswith('.shp'):
         shapefile_path = os.path.join(extracted_folder, file)
         break
+
 if shapefile_path is None:
     print("No shapefile found in the extracted files.")
 else:
+    # Read the shapefile
     gdf = gpd.read_file(shapefile_path)
+
+# Add the extracted files to your GitHub repository
+  # Set the path to your local GitHub repository
+os.chdir(base_dir)
+
+# Copy extracted files into your GitHub repository folder
+shutil.copytree(extracted_folder, os.path.join(base_dir, 'extracted_files'))
+
+# Add, commit, and push the changes
+subprocess.run(['git', 'add', '.'])  # Add all changes
+subprocess.run(['git', 'commit', '-m', f'Add extracted files for {todaystr}'])  # Commit with message
+subprocess.run(['git', 'push', 'origin', 'main'])  # Push to the main branch
+
+# Clean up by removing the downloaded and extracted files
+
 
 co = gdf[gdf['WFO'].isin(['KBOU' , 'KGJT' , 'KPUB' , 'KGLD'])]
 co['Warning Color'] = co['PROD_TYPE'].map(wwa_colors)
@@ -224,7 +259,7 @@ co = co.reset_index(drop=True)
 # The forecast has to be processed to sum up through the next 12z step of the NDFD
 
 fcst_url = "https://tgftp.nws.noaa.gov/SL.us008001/ST.opnl/DF.gr2/DC.ndfd/AR.crrocks/VP.001-003/ds.snow.bin"
-fcst_name = os.path.join(base_dir, 'daily_file', f'{todaystr}_ndfdsnow.bin')
+fcst_name = os.path.join(base_dir, extracted_folder, f'{todaystr}_ndfdsnow.bin')
 response = requests.get(fcst_url, stream=True)
 response.raise_for_status()
 with open(fcst_name, 'wb') as file:
@@ -260,7 +295,7 @@ snow_forecast = df.interp(x=new_lat, y=new_lon)
 # The accumulation data is much easier to work with, but I'm still filtering out non-Colorado data
 
 accum_url = f"https://www.nohrsc.noaa.gov/snowfall_v2/data/{mo}/sfav2_CONUS_24h_{todaystr}12.nc"
-accum_name = os.path.join(base_dir, 'daily_file', f'{todaystr}_gridded.nc')
+accum_name = os.path.join(base_dir, extracted_folder, f'{todaystr}_gridded.nc')
 response = requests.get(accum_url, stream=True)
 with open(accum_name, "wb") as file:
     for chunk in response.iter_content(chunk_size=8192):
@@ -275,6 +310,9 @@ target_lat = np.linspace(co_bounds[2], co_bounds[3], latlen*inter_factor)
 target_lon = np.linspace(co_bounds[0], co_bounds[1], lonlen*inter_factor)
 snow_accumulation = df_co['Data'].interp(lat=target_lat, lon=target_lon, method='linear')
 
+shutil.copytree(extracted_folder, os.path.join(base_dir, 'extracted_files'))
+
+# Add, commit, and push the changes
 # Ignore this warning
 
 
@@ -468,4 +506,4 @@ fig.text(0.025, 1.004, f'Winter Weather Report: {todayst}', fontsize=200, weight
 fig.text(0.04, 0.967, f'Valid as of {ts}', fontsize=80, weight='bold', style='italic')
 fig.figimage(cdotlogo, 6050, 4250, zorder=20)
 plt.savefig(os.path.join(base_dir, 'daily_file', f'{todaystr}_MWR.png', bbox_inches='tight'))
-
+shutil.copytree(extracted_folder, os.path.join(base_dir, 'extracted_files'))
