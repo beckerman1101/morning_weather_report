@@ -53,7 +53,6 @@ import tarfile
 from bs4 import BeautifulSoup
 import re
 import textwrap
-from google.colab import drive
 os.environ['SHAPE_RESTORE_SHX'] = 'YES'
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
