@@ -7,7 +7,6 @@ cfgrib==0.9.15.0
 cmasher==1.9.2
 colorspacious==1.1.2
 cryptography==44.0.1
-docopt==0.6.2
 eccodes==2.39.2
 findlibs==0.1.0
 geopandas==1.0.1
