@@ -224,7 +224,7 @@ co = co.reset_index(drop=True)
 # The forecast has to be processed to sum up through the next 12z step of the NDFD
 
 fcst_url = "https://tgftp.nws.noaa.gov/SL.us008001/ST.opnl/DF.gr2/DC.ndfd/AR.crrocks/VP.001-003/ds.snow.bin"
-fcst_name = fos.path.join(base_dir, 'daily_file', f'{todaystr}/{todaystr}_ndfdsnow.bin")
+fcst_name = os.path.join(base_dir, 'daily_file', f'{todaystr}/{todaystr}_ndfdsnow.bin')
 response = requests.get(fcst_url, stream=True)
 response.raise_for_status()
 with open(fcst_name, 'wb') as file:
