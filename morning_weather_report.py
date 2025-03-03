@@ -96,16 +96,16 @@ todaystr
 
 # These open up the highway logos and cdot for the top of the figure. The cdot logo is a mess, see the final few lines of the notebook
 
-cdotlogo = mpimg.imread(os.path.join(base_dir, 'images', 'image (1).png')
-nws = mpimg.imread(os.path.join(base_dir, 'images', 'nwslogo.png')
-us160 = mpimg.imread(os.path.join(base_dir, 'images', 'US_160.png')
-us550 = mpimg.imread(os.path.join(base_dir, 'images', 'US_550.png')
-us50 = mpimg.imread(os.path.join(base_dir, 'images', 'US_50.png')
-us40 = mpimg.imread(os.path.join(base_dir, 'images', 'US_40.png')
-us285 = mpimg.imread(os.path.join(base_dir, 'images', 'US_285.png')
-i25 = mpimg.imread(os.path.join(base_dir, 'images', 'I-25.png')
-i70 = mpimg.imread(os.path.join(base_dir, 'images', 'I-70.png')
-i76 = mpimg.imread(os.path.join(base_dir, 'images', 'I-76.png')
+cdotlogo = mpimg.imread(os.path.join(base_dir, 'images', 'image (1).png'))
+nws = mpimg.imread(os.path.join(base_dir, 'images', 'nwslogo.png'))
+us160 = mpimg.imread(os.path.join(base_dir, 'images', 'US_160.png'))
+us550 = mpimg.imread(os.path.join(base_dir, 'images', 'US_550.png'))
+us50 = mpimg.imread(os.path.join(base_dir, 'images', 'US_50.png'))
+us40 = mpimg.imread(os.path.join(base_dir, 'images', 'US_40.png'))
+us285 = mpimg.imread(os.path.join(base_dir, 'images', 'US_285.png'))
+i25 = mpimg.imread(os.path.join(base_dir, 'images', 'I-25.png'))
+i70 = mpimg.imread(os.path.join(base_dir, 'images', 'I-70.png'))
+i76 = mpimg.imread(os.path.join(base_dir, 'images', 'I-76.png'))
 
 # Colorado bounds and padding for the maps. This can be adjusted if we want to scale the mapping
 co_bounds = [-109.05,-102.05,37,41]
