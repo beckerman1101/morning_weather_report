@@ -192,7 +192,7 @@ afdtext = messages_list[1:]
 
 url = 'https://tgftp.nws.noaa.gov/SL.us008001/DF.sha/DC.cap/DS.WWA/current_all.tar.gz'
 downloaded_file_path = f'{todaystr}_wwa.tar.gz'
-extracted_folder = fos.path.join(base_dir, files/{todaystr}'
+extracted_folder = os.path.join(base_dir, 'daily_files')
 if not os.path.exists(extracted_folder):
     os.makedirs(extracted_folder)
 response = requests.get(url)
