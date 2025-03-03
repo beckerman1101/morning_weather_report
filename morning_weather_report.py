@@ -115,8 +115,8 @@ x = .15
 # My laziness backfired on the cdot boundaries. I ignored the projection file and had to manually manipulate it, but this works
 # Don't fix what ain't broken
 
-counties = gpd.read_file(os.path.join(base_dir, 'shapefiles', 'tl_2019_08_county.shp')
-cdot = gpd.read_file(os.path.join(base_dir, 'shapefiles', 'MaintenanceSections.shp').set_crs(epsg=26913)
+counties = gpd.read_file(os.path.join(base_dir, 'shapefiles', 'tl_2019_08_county.shp'))
+cdot = gpd.read_file(os.path.join(base_dir, 'shapefiles', 'MaintenanceSections.shp').set_crs(epsg=26913))
 cdot = cdot.to_crs(epsg=32662)
 cdot_bounds = cdot.total_bounds
 x_scale = (co_bounds[1]-co_bounds[0])/(cdot_bounds[2]-cdot_bounds[0])
@@ -126,8 +126,8 @@ cdot_bounds2 = cdot.total_bounds
 lx = cdot_bounds2[0]
 ly = cdot_bounds2[1]
 cdot = cdot.translate(xoff=co_bounds[0]-lx, yoff=co_bounds[2]-ly)
-sh = gpd.read_file(os.path.join(base_dir, 'shapefiles', 'tl_2021_08_prisecroads.shp')
-interstates = gpd.read_file(os.path.join(base_dir, 'shapefiles', 'us_interstate_highways.shp')
+sh = gpd.read_file(os.path.join(base_dir, 'shapefiles', 'tl_2021_08_prisecroads.shp'))
+interstates = gpd.read_file(os.path.join(base_dir, 'shapefiles', 'us_interstate_highways.shp'))
 
 """### Establishing colorbars and their labels for snowfall and WWA Display"""
 
@@ -224,7 +224,7 @@ co = co.reset_index(drop=True)
 # The forecast has to be processed to sum up through the next 12z step of the NDFD
 
 fcst_url = "https://tgftp.nws.noaa.gov/SL.us008001/ST.opnl/DF.gr2/DC.ndfd/AR.crrocks/VP.001-003/ds.snow.bin"
-fcst_name = f"os.path.join(base_dir, 'daily_file', '{todaystr}/{todaystr}_ndfdsnow.bin"
+fcst_name = fos.path.join(base_dir, 'daily_file', f'{todaystr}/{todaystr}_ndfdsnow.bin")
 response = requests.get(fcst_url, stream=True)
 response.raise_for_status()
 with open(fcst_name, 'wb') as file:
@@ -260,7 +260,7 @@ snow_forecast = df.interp(x=new_lat, y=new_lon)
 # The accumulation data is much easier to work with, but I'm still filtering out non-Colorado data
 
 accum_url = f"https://www.nohrsc.noaa.gov/snowfall_v2/data/{mo}/sfav2_CONUS_24h_{todaystr}12.nc"
-accum_name = f"os.path.join(base_dir, 'daily_file', '{todaystr}/{todaystr}_gridded.nc"
+accum_name = os.path.join(base_dir, 'daily_file', f'{todaystr}/{todaystr}_gridded.nc')
 response = requests.get(accum_url, stream=True)
 with open(accum_name, "wb") as file:
     for chunk in response.iter_content(chunk_size=8192):
@@ -378,7 +378,7 @@ ax3.axis('off')
 # the value, so 2" will produce 1-3"
 # If 3<x<=8, the range is 4", and above 8", the range is 6"
 
-table = pd.read_csv(os.path.join(base_dir, 'fcst_locations.csv')
+table = pd.read_csv(os.path.join(base_dir, 'fcst_locations.csv'))
 lats_lons = np.vstack([snow_forecast['latitude'].values.ravel(), snow_forecast['longitude'].values.ravel()]).T
 kdtree = cKDTree(lats_lons)  # Create KDTree once
 lats, lons, vals, ranges, fcst= [], [], [], [], []
