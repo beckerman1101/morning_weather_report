@@ -19,45 +19,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'  # Specify the version of Python
-
-
-      # Step 4: Install dependencies from requirements.txt
-#      - name: Install dependencies
-#        run: |
-#          pip install -r requirements.txt
-
-#      # Step 5: Run the Python script (generate PNG file)
-#      - name: Run Python script
-#        run: |
-#          python daily_accum_map.py  # Run the script that generates the PNG file
-
-      # Step 6: Commit and push the generated PNG file
-#      - name: Commit and push PNG file
-#        run: |
-#          git config --global user.name "github-actions"
-#          git config --global user.email "github-actions@github.com"
-#          git add daily_file/*.png
-#          git commit -m "Add daily snowfall PNG file"
-#          git push
-#        continue-on-error: true  # Avoid failure if no changes exist
-      - name: Set UTF-8 Encoding
-        run: |
-          chcp 65001
-          echo "PYTHONIOENCODING=utf-8" >> $GITHUB_ENV
-
-      # Step 7: Debug step - Print environment variables (without exposing secrets)
-      - name: Debug Environment Variables
-        shell: bash
-        run: |
-          echo "GOOGLE_EMAIL is set? [${{ secrets.GOOGLE_EMAIL != '' }}]"
-          echo "GOOGLE_PASSWORD is set? [${{ secrets.GOOGLE_APP_PASSWORD != '' }}]"
-          echo "EMAIL_RECIPIENTS is set? [${{ secrets.EMAIL_RECIPIENTS != '' }}]"
-
-      # Step 8: Send email with the generated PNG attachment
+          
       - name: Run Python script
-        env:
-          GOOGLE_EMAIL: "${{ secrets.GOOGLE_EMAIL }}"
-          GOOGLE_PASSWORD: "${{ secrets.GOOGLE_APP_PASSWORD }}"
-          EMAIL_RECIPIENTS: "${{ secrets.EMAIL_RECIPIENTS }}"
         run: |
-          python send_email.py
+          python morning_weather_report.py
