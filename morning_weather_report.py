@@ -378,7 +378,7 @@ ax3.axis('off')
 # the value, so 2" will produce 1-3"
 # If 3<x<=8, the range is 4", and above 8", the range is 6"
 
-table = pd.read_csv(os.path.join(base_dir, fcst_locations.csv')
+table = pd.read_csv(os.path.join(base_dir, 'fcst_locations.csv')
 lats_lons = np.vstack([snow_forecast['latitude'].values.ravel(), snow_forecast['longitude'].values.ravel()]).T
 kdtree = cKDTree(lats_lons)  # Create KDTree once
 lats, lons, vals, ranges, fcst= [], [], [], [], []
