@@ -467,5 +467,5 @@ fig.suptitle(' ', x=0, y=1.07, fontsize=240, ha='left')
 fig.text(0.025, 1.004, f'Winter Weather Report: {todayst}', fontsize=200, weight='bold', style='italic')
 fig.text(0.04, 0.967, f'Valid as of {ts}', fontsize=80, weight='bold', style='italic')
 fig.figimage(cdotlogo, 6050, 4250, zorder=20)
-plt.savefig(f"os.path.join(base_dir, 'daily_file', '{todaystr}/{todaystr}_MWR.png", bbox_inches='tight')
+plt.savefig(os.path.join(base_dir, 'daily_file', f'{todaystr}_MWR.png', bbox_inches='tight')
 
