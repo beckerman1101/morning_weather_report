@@ -1,6 +1,7 @@
 appdirs==1.4.4
 atomicwrites==1.4.0
 backcall==0.2.0
+bs4==0.0.1
 Cartopy==0.24.1
 cfgrib==0.9.15.0
 cmasher==1.9.2
@@ -32,7 +33,6 @@ pyls-spyder==0.4.0
 pyogrio==0.10.0
 PyQt5==5.15.10
 PyQtWebEngine==5.15.6
-python-awips==20.1
 Requests==2.32.3
 requests-oauthlib==2.0.0
 rsa==4.9
