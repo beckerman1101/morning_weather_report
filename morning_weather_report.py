@@ -224,7 +224,7 @@ co = co.reset_index(drop=True)
 # The forecast has to be processed to sum up through the next 12z step of the NDFD
 
 fcst_url = "https://tgftp.nws.noaa.gov/SL.us008001/ST.opnl/DF.gr2/DC.ndfd/AR.crrocks/VP.001-003/ds.snow.bin"
-fcst_name = os.path.join(base_dir, 'daily_file', f'{todaystr}/{todaystr}_ndfdsnow.bin')
+fcst_name = os.path.join(base_dir, 'daily_file', f'{todaystr}_ndfdsnow.bin')
 response = requests.get(fcst_url, stream=True)
 response.raise_for_status()
 with open(fcst_name, 'wb') as file:
@@ -260,7 +260,7 @@ snow_forecast = df.interp(x=new_lat, y=new_lon)
 # The accumulation data is much easier to work with, but I'm still filtering out non-Colorado data
 
 accum_url = f"https://www.nohrsc.noaa.gov/snowfall_v2/data/{mo}/sfav2_CONUS_24h_{todaystr}12.nc"
-accum_name = os.path.join(base_dir, 'daily_file', f'{todaystr}/{todaystr}_gridded.nc')
+accum_name = os.path.join(base_dir, 'daily_file', f'{todaystr}_gridded.nc')
 response = requests.get(accum_url, stream=True)
 with open(accum_name, "wb") as file:
     for chunk in response.iter_content(chunk_size=8192):
