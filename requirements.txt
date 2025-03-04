@@ -2,7 +2,7 @@ appdirs==1.4.4
 atomicwrites==1.4.0
 backcall==0.2.0
 beautifulsoup4==4.12.2
-Cartopy==0.24.1
+#Cartopy==0.24.1
 cfgrib==0.9.15.0
 cmasher==1.9.2
 colorspacious==1.1.2
