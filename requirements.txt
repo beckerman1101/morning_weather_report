@@ -1,3 +1,4 @@
+git+https://github.com/psf/requests.git@main#egg=requests
 appdirs==1.4.4
 atomicwrites==1.4.0
 backcall==0.2.0
