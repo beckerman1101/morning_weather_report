@@ -25,4 +25,4 @@ jobs:
           pip install -r requirements.txt     
       - name: Run Python script
         run: |
-          python morning_weather_report.py
+          python send_email.py
