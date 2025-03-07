@@ -1,14 +1,12 @@
 import requests
 import os
 from github import Github
-from git import Repo
 
-# GitHub configuration
-GITHUB_TOKEN = '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'
-g = Github(GITHUB_TOKEN)
-REPO_NAME = g.get_repo('beckerman1101/daily_accum_mapping')  # Replace with your repository
-BRANCH_NAME = 'main'  # Adjust if needed
-FILE_PATH_IN_REPO = 'daily_file/filename.tar.gz'  # Path where the file will be saved in your repo
+# GitHub Configuration - Use environment variables instead of hardcoding credentials
+GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')  # Set this in your environment
+REPO_NAME = 'beckerman1101/daily_accum_mapping'  # Replace with your repository
+BRANCH_NAME = 'main'
+FILE_PATH_IN_REPO = 'daily_file/filename.tar.gz'
 DOWNLOAD_URL = 'https://tgftp.nws.noaa.gov/SL.us008001/DF.sha/DC.cap/DS.WWA/current_all.tar.gz'
 
 # Download the file from the URL
@@ -22,35 +20,30 @@ def download_file(url, filename):
         print(f"Failed to download file: {response.status_code}")
 
 # Push the file to GitHub repository
-def push_to_github(file_path, repo_name, branch_name, github_token):
-    # Authenticate with GitHub
-    g = Github(github_token)
-    repo = g.get_repo(repo_name)
-    
-    # Ensure we're working with the correct branch
+def push_to_github(file_path):
+    g = Github(GITHUB_TOKEN)
+    repo = g.get_repo(REPO_NAME)
+
     try:
-        branch_ref = repo.get_git_ref(f"heads/{branch_name}")
-    except:
-        print(f"Error: Branch {branch_name} does not exist.")
-        return
+        # Read file content
+        with open(file_path, 'rb') as file_content:
+            content = file_content.read()
 
-    # Upload the file to the repository
-    with open(file_path, 'rb') as file_content:
-        repo.create_file(FILE_PATH_IN_REPO, "Add downloaded file", file_content.read(), branch=branch_name)
-
-    print(f"File successfully pushed to GitHub at {repo_name}/{branch_name}")
+        # Commit file to GitHub
+        repo.create_file(FILE_PATH_IN_REPO, "Add downloaded file", content, branch=BRANCH_NAME)
+        print(f"File successfully pushed to GitHub at {REPO_NAME}/{BRANCH_NAME}")
+    except Exception as e:
+        print(f"Error pushing file to GitHub: {e}")
 
 # Main function
 def main():
-    # Download the file
     downloaded_filename = 'downloaded_file.tar.gz'
     download_file(DOWNLOAD_URL, downloaded_filename)
-    
-    # Push the downloaded file to GitHub repository
-    push_to_github(downloaded_filename, REPO_NAME, BRANCH_NAME, GITHUB_TOKEN)
-
-    # Optionally, you can clean up by deleting the downloaded file
+    push_to_github(downloaded_filename)
     os.remove(downloaded_filename)
 
 if __name__ == "__main__":
-    main()
+    if not GITHUB_TOKEN:
+        print("Error: GITHUB_TOKEN is not set. Set it as an environment variable.")
+    else:
+        main()
