@@ -268,7 +268,8 @@ df1 = 39.3701*snow_m
 df2 = 39.3701*snow_accum
 df3 = df2.Data
 
-table = os.path.join(base_dir, 'fcst_locations.csv')
+table_file = os.path.join(base_dir, 'fcst_locations.csv')
+table = pd.read_csv(table_file)
 lats_lons = np.vstack([df1['latitude'].values.ravel(), df1['longitude'].values.ravel()]).T
 kdtree = cKDTree(lats_lons)
 lats, lons, vals, ranges, fcst= [], [], [], [], []
