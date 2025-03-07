@@ -2,7 +2,7 @@ import os
 import sendgrid
 from sendgrid.helpers.mail import Mail, Email, To, Content, Attachment
 from base64 import b64encode
-import datetime
+from datetime import datetime, timedelta
 
 today = datetime.now(ZoneInfo('America/Denver'))
 todaystr = today.strftime('%m/%d')
