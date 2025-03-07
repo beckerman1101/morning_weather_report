@@ -19,10 +19,16 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'  # Specify the version of Python
+
+      # Step 3: Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip  # Upgrades pip to the latest version
           pip install -r requirements.txt     
+
+      # Step 4: Run Python script with GitHub Token
       - name: Run Python script
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}  # Pass GitHub token as an environment variable
         run: |
           python send_email.py
