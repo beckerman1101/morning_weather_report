@@ -14,10 +14,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Debug Cache Key
-      - name: Debug Cache Key
-        run: echo "Cache Key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}"
-
       # Step 3: Cache pip dependencies
       - name: Cache pip dependencies
         uses: actions/cache@v3
