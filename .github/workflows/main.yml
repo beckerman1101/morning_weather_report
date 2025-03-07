@@ -43,4 +43,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         run: |
-          python send_email.py
+          python daily_accum_mapping.py
