@@ -35,6 +35,6 @@ jobs:
 
       - name: Run Email script
         env:
-          SENDGRID_API_KEY: ${{ secrets.SENDGRID_KEY }}
+          GMAIL_PW: ${{ secrets.GMAIL_PW }}
         run: | 
           python send_email.py
