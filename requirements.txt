@@ -38,6 +38,7 @@ Requests==2.32.3
 requests-oauthlib==2.0.0
 rsa==4.9
 scipy==1.15.2
+sendgrid
 setuptools==75.1.0
 Shapely==2.0.7
 tqdm==4.66.5
