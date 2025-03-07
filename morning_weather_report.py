@@ -3,7 +3,7 @@
 # All of them should import, but if any errors arise, just add the missing packages
 # to the cell above after cfgrib and re-run the notebook
 # Most of them should be available within Colab's base environment
-pip install cartopy cfgrib
+
 
 
 import numpy as np
