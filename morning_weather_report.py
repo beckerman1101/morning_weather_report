@@ -485,9 +485,12 @@ fig.figimage(cdotlogo, 6050, 4250, zorder=20)
 
 
 
-# Your existing download and data processing code
+import os
+from github import Github
 
-# Generate the figure and save it as PNG
+# Define your variables like todaystr, GITHUB_TOKEN, REPO_NAME, BRANCH_NAME, etc.
+
+# Function to save the figure
 def save_figure():
     png_filename = os.path.join(base_dir, f'{todaystr}_MWR.png')
     fig.savefig(png_filename, bbox_inches='tight')
@@ -495,7 +498,7 @@ def save_figure():
     return png_filename
 
 # Function to push file to GitHub
-def push_to_github(file_path):
+def push_to_github(file_path, file_name_in_repo):
     g = Github(GITHUB_TOKEN)
     repo = g.get_repo(REPO_NAME)
 
@@ -505,7 +508,7 @@ def push_to_github(file_path):
             content = file_content.read()
 
         # Commit the file to GitHub at the specified path
-        repo.create_file(FILE_PATH_IN_REPO, "Add figure PNG", content, branch=BRANCH_NAME)
+        repo.create_file(file_name_in_repo, "Add figure PNG", content, branch=BRANCH_NAME)
         print(f"File successfully pushed to GitHub at {REPO_NAME}/{BRANCH_NAME}")
     except Exception as e:
         print(f"Error pushing file to GitHub: {e}")
@@ -514,16 +517,18 @@ def push_to_github(file_path):
 def main():
     # (Include your existing file download and data processing code here)
 
+    # Save the figure and get the PNG filename
     png_filename = save_figure()
 
+    # Define the file path in the repo
+    FILE_PATH_IN_REPO = os.path.basename(png_filename)
+
     # Push the PNG file to GitHub
-    push_to_github(png_filename)
+    push_to_github(png_filename, FILE_PATH_IN_REPO)
 
     # Optionally, clean up by deleting temporary files
     os.remove(png_filename)
 
 if __name__ == "__main__":
     main()
-FILE_PATH_IN_REPO = os.path.basename(png_filename)
 
-push_to_github(png_filename)
