@@ -35,7 +35,7 @@ SUBJECT = "Morning Weather Report"
 BODY = "Please find the attached Morning Weather Report PNG."
 
 # Path to the PNG file
-ATTACHMENT_PATH = os.path.join(base_dir, f'{todaystr}_MWR.png')  # Update with your PNG file path
+ATTACHMENT_PATH = os.path.join(base_dir, f'{filestr}_MWR.png')  # Update with your PNG file path
 
 def send_email():
     # Create the MIME email object
