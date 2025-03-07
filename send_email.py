@@ -41,9 +41,12 @@ def send_email_with_attachment(png_filename):
     # Send the email
     try:
         response = sg.send(mail)
-        print(f"Email sent! Status Code: {response.status_code}")
+        print(f"Email sent successfully! Response code: {response.status_code}")
     except Exception as e:
         print(f"Error sending email: {e}")
+        if hasattr(e, 'response') and e.response:
+            print(f"Response body: {e.response.body}")
+
 
 # Example usage in the script
 if __name__ == "__main__":
