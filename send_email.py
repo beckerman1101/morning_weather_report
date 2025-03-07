@@ -1,7 +1,9 @@
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
 import os
-import sendgrid
-from sendgrid.helpers.mail import Mail, Email, To, Content, Attachment
-from base64 import b64encode
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -10,45 +12,64 @@ todaystr = today.strftime('%m/%d')
 filestr = today.strftime('%Y%m%d')
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
-SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
-FROM_EMAIL = 'brendan.eckerman@state.co.us'
-TO_EMAIL = 'beckerman1101@gmail.com'
-SUBJECT = 'Daily Weather Report'
-BODY = 'Please find the attached weather report in PNG format.'
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
+import os
 
-def send_email_with_attachment(png_filename):
-    # Create SendGrid client
-    sg = sendgrid.SendGridAPIClient(api_key=SENDGRID_API_KEY)
+# Gmail SMTP settings
+SMTP_SERVER = "smtp.gmail.com"
+SMTP_PORT = 587
 
-    # Create email components
-    from_email = Email(FROM_EMAIL)
-    to_email = To(TO_EMAIL)
-    subject = SUBJECT
-    content = Content("text/plain", BODY)
+# Sender's email and App Password (for Gmail 2FA)
+SENDER_EMAIL = "beckerman1101@gmail.com"
+SENDER_PASSWORD = os.getenv('GMAIL_PW') # Use an App Password if 2FA is enabled
 
-    # Create the email message
-    mail = Mail(from_email, to_email, subject, content)
+# Recipient email
+RECIPIENT_EMAIL = "brendan.eckerman@state.co.us"
+
+# Email Subject & Body
+SUBJECT = "Morning Weather Report"
+BODY = "Please find the attached Morning Weather Report PNG."
+
+# Path to the PNG file
+ATTACHMENT_PATH = os.path.join(base_dir, f'{todaystr}_MWR.png')  # Update with your PNG file path
+
+def send_email():
+    # Create the MIME email object
+    msg = MIMEMultipart()
+    msg['From'] = SENDER_EMAIL
+    msg['To'] = RECIPIENT_EMAIL
+    msg['Subject'] = SUBJECT
+    
+    # Attach the email body
+    msg.attach(MIMEText(BODY, 'plain'))
 
     # Attach the PNG file
-    with open(png_filename, 'rb') as f:
-        attachment = Attachment()
-        attachment.content = b64encode(f.read()).decode()  # Base64 encode the content
-        attachment.type = 'image/png'  # Specify the MIME type
-        attachment.filename = os.path.basename(png_filename)  # Use the filename as attachment name
-        attachment.disposition = 'attachment'  # Set the disposition to 'attachment'
-        mail.attachment = attachment
+    try:
+        with open(ATTACHMENT_PATH, "rb") as attachment:
+            part = MIMEBase('application', 'octet-stream')
+            part.set_payload(attachment.read())
+            encoders.encode_base64(part)
+            part.add_header('Content-Disposition', f'attachment; filename={os.path.basename(ATTACHMENT_PATH)}')
+            msg.attach(part)
+    except Exception as e:
+        print(f"Error attaching file: {e}")
+        return
 
     # Send the email
     try:
-        response = sg.send(mail)
-        print(f"Email sent successfully! Response code: {response.status_code}")
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.starttls()  # Encrypts the connection
+            server.login(SENDER_EMAIL, SENDER_PASSWORD)  # Log in using email and App Password
+            text = msg.as_string()
+            server.sendmail(SENDER_EMAIL, RECIPIENT_EMAIL, text)
+            print("Email sent successfully.")
     except Exception as e:
         print(f"Error sending email: {e}")
-        if hasattr(e, 'response') and e.response:
-            print(f"Response body: {e.response.body}")
 
-
-# Example usage in the script
+# Main function to call the send_email function
 if __name__ == "__main__":
-    png_filename = os.path.join(base_dir, f'{filestr}_MWR.png') # Replace with the actual path to your PNG
-    send_email_with_attachment(png_filename)
+    send_email()
