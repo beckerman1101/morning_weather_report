@@ -47,6 +47,7 @@ today = datetime.now(ZoneInfo('America/Denver'))
 yesterday = today - timedelta(days=1)
 todayst = today.strftime('%a %m/%d')
 yesterdayst = yesterday.strftime('%a %m/%d')
+yesterdaystr = yesterday.strftime('%Y%m%d')
 todaystr = today.strftime('%Y%m%d')
 mo = today.strftime('%Y%m')
 ts = today.strftime('%I:%M %p')
@@ -252,17 +253,31 @@ else:
 snow_m = snow_fcst.isel(step=slice(0, pos)).unknown.sum(dim='step')
 end = snow_fcst.step[pos].valid_time.values.astype('datetime64[s]').astype(datetime).replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/Denver")).strftime('%I%p %a')
 
-accum_url = f"https://www.nohrsc.noaa.gov/snowfall_v2/data/{mo}/sfav2_CONUS_24h_{todaystr}12.nc"
-accum_name = os.path.join(base_dir, f'{todaystr}_gridded.nc')
+datasets = []  # List to store datasets
+datasets = []
+ts_list = [yesterdaystr+'12', yesterdaystr+'18', todaystr+'00', todaystr+'06']
+for i in range(len(ts_list)): # Extract month from date
+    accum_url = f"https://www.nohrsc.noaa.gov/snowfall_v2/data/{mo}/sfav2_CONUS_6h_{ts_list[i]}.nc"
+    accum_name = f'{ts_list[i]}_gridded.nc'
 
-response = requests.get(accum_url, stream=True)
-response.raise_for_status()
-with open(accum_name, "wb") as file:
-    for chunk in response.iter_content(chunk_size=8192):
-        file.write(chunk)
-print(f"Snow accumulation file downloaded: {accum_name}")
+    # Download file
+    response = requests.get(accum_url, stream=True)
+    if response.status_code == 200:
+        with open(accum_name, "wb") as file:
+            for chunk in response.iter_content(chunk_size=8192):
+                file.write(chunk)
+        print(f"Downloaded: {accum_name}")
 
-snow_accum = xr.open_dataset(accum_name)
+        # Open the dataset
+        ds = xr.open_dataset(accum_name)
+        datasets.append(ds)
+
+# Combine datasets and sum over time
+if datasets:
+    snow_accum = xr.concat(datasets, dim="time").sum(dim="time")
+    print("Successfully combined and summed snowfall datasets")
+else:
+    print("No files were successfully downloaded.")
 
 df1 = 39.3701*snow_m
 df2 = 39.3701*snow_accum
