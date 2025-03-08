@@ -11,13 +11,9 @@ today = datetime.now(ZoneInfo('America/Denver'))
 todaystr = today.strftime('%m/%d')
 filestr = today.strftime('%Y%m%d')
 
+
+
 base_dir = os.path.dirname(os.path.abspath(__file__))
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
-from email import encoders
-import os
 
 # Gmail SMTP settings
 SMTP_SERVER = "smtp.gmail.com"
@@ -36,6 +32,12 @@ BODY = "Attached is today's Morning Weather Report. If you have questions or the
 
 # Path to the PNG file
 ATTACHMENT_PATH = os.path.join(base_dir, f'{filestr}_MWR.png')  # Update with your PNG file path
+
+print(f"Checking for file: {ATTACHMENT_PATH}")
+if not os.path.exists(ATTACHMENT_PATH):
+    print(f"Error: File {ATTACHMENT_PATH} not found.")
+    print("Files in base_dir:", os.listdir(base_dir))
+    exit(1) 
 
 def send_email():
     # Create the MIME email object
