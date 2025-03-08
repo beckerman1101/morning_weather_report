@@ -33,6 +33,10 @@ jobs:
         run: |
           python morning_weather_report.py
 
+      - name: Wait for 30 seconds before sending the email
+        run: sleep 30
+
+
       - name: Run Email script
         env:
           GMAIL_PW: ${{ secrets.GMAIL_PW }}
