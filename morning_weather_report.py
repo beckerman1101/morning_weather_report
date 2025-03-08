@@ -550,7 +550,7 @@ def send_email():
             server.starttls()  # Encrypts the connection
             server.login(SENDER_EMAIL, SENDER_PASSWORD)  # Log in using email and App Password
             text = msg.as_string()
-            server.sendmail(SENDER_EMAIL, RECIPIENT_EMAIL, text)
+            server.sendmail(SENDER_EMAIL, RECIPIENT_EMAILS, text)
             print("Email sent successfully.")
     except Exception as e:
         print(f"Error sending email: {e}")
