@@ -495,53 +495,66 @@ fig.suptitle(' ', x=0, y=1.07, fontsize=240, ha='left')
 fig.text(0.025, 1.004, f'Winter Weather Report: {todayst}', fontsize=200, weight='bold', style='italic')
 fig.text(0.04, 0.967, f'Valid as of {ts}', fontsize=80, weight='bold', style='italic')
 fig.figimage(cdotlogo, 6050, 4250, zorder=20)
+file_path = os.path.join(base_dir, f'{todaystr}_MWR.png')
+plt.savefig(file_path, bbox_inches='tight')
 
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
 
+# Gmail SMTP settings
+SMTP_SERVER = "smtp.gmail.com"
+SMTP_PORT = 587
 
-import os
-from github import Github
+# Sender's email and App Password (for Gmail 2FA)
+SENDER_EMAIL = "beckerman1101@gmail.com"
+SENDER_PASSWORD = os.getenv('GMAIL_PW') # Use an App Password if 2FA is enabled
 
-# Define your variables like todaystr, GITHUB_TOKEN, REPO_NAME, BRANCH_NAME, etc.
+# Recipient email
+RECIPIENT_EMAIL = "brendan.eckerman@state.co.us"
 
-# Function to save the figure
-def save_figure():
-    png_filename = os.path.join(base_dir, f'{todaystr}_MWR.png')
-    fig.savefig(png_filename, bbox_inches='tight')
-    print(f"Figure saved as: {png_filename}")
-    return png_filename
+# Email Subject & Body
+SUBJECT = f"Morning Weather Report - {todaystr}"
+BODY = "Attached is today's Morning Weather Report. If you have questions or the report did not generate correctly, please reach out to Brendan at brendan.eckerman@state.co.us"
 
-# Function to push file to GitHub
-def push_to_github(file_path, file_name_in_repo):
-    g = Github(GITHUB_TOKEN)
-    repo = g.get_repo(REPO_NAME)
+# Path to the PNG file
+ATTACHMENT_PATH = file_path # Update with your PNG file path
 
+def send_email():
+    # Create the MIME email object
+    msg = MIMEMultipart()
+    msg['From'] = SENDER_EMAIL
+    msg['To'] = RECIPIENT_EMAIL
+    msg['Subject'] = SUBJECT
+    
+    # Attach the email body
+    msg.attach(MIMEText(BODY, 'plain'))
+
+    # Attach the PNG file
     try:
-        # Read file content
-        with open(file_path, 'rb') as file_content:
-            content = file_content.read()
-
-        # Commit the file to GitHub at the specified path
-        repo.create_file(file_name_in_repo, "Add figure PNG", content, branch=BRANCH_NAME)
-        print(f"File successfully pushed to GitHub at {REPO_NAME}/{BRANCH_NAME}")
+        with open(ATTACHMENT_PATH, "rb") as attachment:
+            part = MIMEBase('application', 'octet-stream')
+            part.set_payload(attachment.read())
+            encoders.encode_base64(part)
+            part.add_header('Content-Disposition', f'attachment; filename={os.path.basename(ATTACHMENT_PATH)}')
+            msg.attach(part)
     except Exception as e:
-        print(f"Error pushing file to GitHub: {e}")
+        print(f"Error attaching file: {e}")
+        return
 
-# Main function
-def main():
-    # (Include your existing file download and data processing code here)
+    # Send the email
+    try:
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.starttls()  # Encrypts the connection
+            server.login(SENDER_EMAIL, SENDER_PASSWORD)  # Log in using email and App Password
+            text = msg.as_string()
+            server.sendmail(SENDER_EMAIL, RECIPIENT_EMAIL, text)
+            print("Email sent successfully.")
+    except Exception as e:
+        print(f"Error sending email: {e}")
 
-    # Save the figure and get the PNG filename
-    png_filename = save_figure()
-
-    # Define the file path in the repo
-    FILE_PATH_IN_REPO = os.path.basename(png_filename)
-
-    # Push the PNG file to GitHub
-    push_to_github(png_filename, FILE_PATH_IN_REPO)
-
-    # Optionally, clean up by deleting temporary files
-    os.remove(png_filename)
-
+# Main function to call the send_email function
 if __name__ == "__main__":
-    main()
-
+    send_email()
