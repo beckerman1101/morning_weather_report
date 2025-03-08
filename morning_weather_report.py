@@ -396,7 +396,7 @@ accum_map = snow_accumulation.plot(ax=ax1, x='lon', y='lat', transform=ccrs.Plat
                               cmap=cmaps, norm=norms, add_colorbar=False)
 fcst_map = snow_forecast.plot(ax=ax2, x='longitude', y='latitude', transform=ccrs.PlateCarree(),
                               cmap=cmaps, norm=norms, add_colorbar=False)
-ax1.set_title('Snowfall Accumulation since 5am yesterday', x=0, fontsize=70, ha='left', style='italic', pad=20)
+ax1.set_title('Snowfall Accumulation: 12am yesterday - 12am today', x=0, fontsize=70, ha='left', style='italic', pad=20)
 ax2.set_title(f'Forecasted Snowfall through {end}', x=0, fontsize=70, ha='left', style='italic', pad=20)
 
 # Setting up the snow colorbar
@@ -426,9 +426,7 @@ for i in range(len(afdtext)):
     string = wrap_label(afdtext[i], width=65)
     ax3.text(1, y, f'- {string}', fontsize=50, ha='left', style='italic')
     y-=3
-disclaimer = "All data & messaging derived from NWS products. Interpolated snowfall is model-derived, and has not been processed for quality control."
 ax3.axis('off')
-#ax3.text(81, 1, disclaimer, fontsize=47, ha='right', style='italic')
 
 # Snow Forecast values
 
