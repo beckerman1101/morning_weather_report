@@ -32,9 +32,9 @@ SUBJECT = f"Morning Weather Report - {todaystr}"
 BODY = "Attached is today's Morning Weather Report. If you have questions or the report did not generate correctly, please reach out to Brendan at brendan.eckerman@state.co.us"
 
 # Path to the PNG file
-ATTACHMENT_PATH = f'{filestr}_MWR.png' # Update with your PNG file path
+ATTACHMENT_PATH = os.path.join(base_dir, f'{filestr}_MWR.png') # Update with your PNG file path
 
-MAX_WAIT_TIME = 240  # Maximum time (in seconds) to wait for the PNG
+MAX_WAIT_TIME = 120  # Maximum time (in seconds) to wait for the PNG
 WAIT_INTERVAL = 10  # Check every 5 seconds
 
 start_time = time.time()
