@@ -2,7 +2,7 @@ name: Run Python Script Daily
 
 on:
   schedule:
-    - cron: '30 12 * * *'  # Runs daily at 12:30 UTC
+    - cron: '45 12 * * *'  # Runs daily at 12:30 UTC
   workflow_dispatch:  # Allows manual execution
 
 jobs:
@@ -27,11 +27,11 @@ jobs:
           pip install -r requirements.txt
 
 
-   #   - name: Run Report script
-   #     env: 
-   #       GITHUB_TOKEN: ${{ secrets.TOKEN }}
-   #     run: |
-   #       python morning_weather_report.py
+      - name: Run Report script
+        env: 
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        run: |
+          python morning_weather_report.py
 
       - name: Run Email script
         env:
