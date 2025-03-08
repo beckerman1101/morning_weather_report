@@ -6,6 +6,7 @@ from email import encoders
 import os
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
+import time
 
 today = datetime.now(ZoneInfo('America/Denver'))
 todaystr = today.strftime('%m/%d')
@@ -33,11 +34,21 @@ BODY = "Attached is today's Morning Weather Report. If you have questions or the
 # Path to the PNG file
 ATTACHMENT_PATH = f'{filestr}_MWR.png' # Update with your PNG file path
 
-print(f"Checking for file: {ATTACHMENT_PATH}")
-if not os.path.exists(ATTACHMENT_PATH):
-    print(f"Error: File {ATTACHMENT_PATH} not found.")
-    print("Files in base_dir:", os.listdir(base_dir))
-    exit(1) 
+MAX_WAIT_TIME = 240  # Maximum time (in seconds) to wait for the PNG
+WAIT_INTERVAL = 10  # Check every 5 seconds
+
+start_time = time.time()
+
+while not os.path.exists(ATTACHMENT_PATH):
+    elapsed_time = time.time() - start_time
+    if elapsed_time > MAX_WAIT_TIME:
+        print(f"❌ PNG file did not appear within {MAX_WAIT_TIME} seconds. Exiting.")
+        exit(1)
+    
+    print(f"Waiting for PNG file... {elapsed_time:.0f}s elapsed")
+    time.sleep(WAIT_INTERVAL)  # Wait before checking again
+
+print(f"✅ PNG file found after {time.time() - start_time:.0f}s: {ATTACHMENT_PATH}")
 
 def send_email():
     # Create the MIME email object
