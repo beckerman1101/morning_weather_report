@@ -36,10 +36,11 @@ jobs:
       - name: Wait for 60 seconds before sending the email
         run: sleep 60
 
-      - name: List files and check permissions
-        run: |
-          ls -l
-          ls -l 20250308_MWR.png
+      - name: List files with details on Windows
+        run: Get-ChildItem -File
+
+      - name: Check PNG file permissions on Windows
+        run: Get-Item "D:\a\daily_accum_mapping\daily_accum_mapping\20250308_MWR.png" | Select-Object Name, @{Name="Permissions";Expression={$_.Attributes}}
     
       - name: Run Email script
         env:
