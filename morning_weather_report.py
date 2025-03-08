@@ -513,11 +513,11 @@ SENDER_EMAIL = "beckerman1101@gmail.com"
 SENDER_PASSWORD = os.getenv('GMAIL_PW') # Use an App Password if 2FA is enabled
 
 # Recipient email
-RECIPIENT_EMAIL = "brendan.eckerman@state.co.us"
+RECIPIENT_EMAIL = "brendan.eckerman@state.co.us,michael.chapman@state.co.us,nicholas.barlow@state.co.us"
 
 # Email Subject & Body
 SUBJECT = f"Morning Weather Report - {todaystr}"
-BODY = "Attached is today's Morning Weather Report. If you have questions or the report did not generate correctly, please reach out to Brendan at brendan.eckerman@state.co.us"
+BODY = "Attached is today's Morning Weather Report. If you have questions or the report appears to have had issues in the process of its creation, please reach out to Brendan at brendan.eckerman@state.co.us"
 
 # Path to the PNG file
 ATTACHMENT_PATH = file_path # Update with your PNG file path
