@@ -31,7 +31,7 @@ SUBJECT = f"Morning Weather Report - {todaystr}"
 BODY = "Attached is today's Morning Weather Report. If you have questions or the report did not generate correctly, please reach out to Brendan at brendan.eckerman@state.co.us"
 
 # Path to the PNG file
-ATTACHMENT_PATH = os.path.join(base_dir, f'{filestr}_MWR.png')  # Update with your PNG file path
+ATTACHMENT_PATH = f'{filestr}_MWR.png' # Update with your PNG file path
 
 print(f"Checking for file: {ATTACHMENT_PATH}")
 if not os.path.exists(ATTACHMENT_PATH):
