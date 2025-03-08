@@ -36,7 +36,11 @@ jobs:
       - name: Wait for 60 seconds before sending the email
         run: sleep 60
 
-
+      - name: List files and check permissions
+        run: |
+          ls -l
+          ls -l 20250308_MWR.png
+    
       - name: Run Email script
         env:
           GMAIL_PW: ${{ secrets.GMAIL_PW }}
