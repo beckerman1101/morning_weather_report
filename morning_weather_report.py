@@ -39,6 +39,7 @@ import tarfile
 from bs4 import BeautifulSoup
 import re
 import textwrap
+from skimage.transform import resize
 from github import Github
 
 # These strings are how every export is labeled, as well as the title
@@ -103,6 +104,8 @@ us285 = mpimg.imread(os.path.join(base_dir, 'images', 'US_285.png'))
 i25 = mpimg.imread(os.path.join(base_dir, 'images', 'I-25.png'))
 i70 = mpimg.imread(os.path.join(base_dir, 'images', 'I-70.png'))
 i76 = mpimg.imread(os.path.join(base_dir, 'images', 'I-76.png'))
+size = (500, 500, 4)
+nws = resize(nws, size, anti_aliasing=True)
 
 # Colorado bounds and padding for the maps. This can be adjusted if we want to scale the mapping
 co_bounds = [-109.05,-102.05,37,41]
@@ -418,7 +421,6 @@ def wrap_label(text, width=8):
 
 ax3.set_xlim(0,50.7485)
 ax3.set_ylim(0,20)
-ax3.imshow(nws, extent=[44, 50, 1, 7], zorder=20)
 ax3.text(1, 17, 'Key Messages:', fontsize=80, ha='left')
 ax3.text(30, 17, '48-Hr Forecasted Snow in High Traffic Areas', fontsize=80, ha='left')
 y = 14
@@ -494,7 +496,8 @@ fig.patches.append(mpatches.Rectangle((0.305, 0.0075), 0.01, 0.385, transform=fi
 fig.suptitle(' ', x=0, y=1.07, fontsize=240, ha='left')
 fig.text(0.025, 1.004, f'Winter Weather Report: {todayst}', fontsize=200, weight='bold', style='italic')
 fig.text(0.04, 0.967, f'Valid as of {ts}', fontsize=80, weight='bold', style='italic')
-fig.figimage(cdotlogo, 6050, 4250, zorder=20)
+fig.figimage(cdotlogo, 5500, 4250, zorder=20)
+fig.figimage(nws, 8500, 4325, zorder=20)
 file_path = os.path.join(base_dir, f'{todaystr}_MWR.png')
 plt.savefig(file_path, bbox_inches='tight')
 
