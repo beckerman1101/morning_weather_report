@@ -515,7 +515,7 @@ SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 
 # Sender's email and App Password (for Gmail 2FA)
-SENDER_EMAIL = "beckerman1101@gmail.com"
+SENDER_EMAIL = ["beckerman1101@gmail.com", "michael.chapman@state.co.us", "nicholas.barlow@state.co.us"]
 SENDER_PASSWORD = os.getenv('GMAIL_PW') # Use an App Password if 2FA is enabled
 
 # Recipient email
