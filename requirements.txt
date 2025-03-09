@@ -41,6 +41,7 @@ scipy==1.15.2
 sendgrid
 setuptools==75.1.0
 Shapely==2.0.7
+skimage
 tqdm==4.66.5
 uritemplate==4.1.1
 wheel==0.44.0
