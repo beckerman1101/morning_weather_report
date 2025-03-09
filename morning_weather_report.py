@@ -516,7 +516,7 @@ SENDER_EMAIL = "beckerman1101@gmail.com"
 SENDER_PASSWORD = os.getenv('GMAIL_PW') # Use an App Password if 2FA is enabled
 
 # Recipient email
-RECIPIENT_EMAILS = ["brendan.eckerman@state.co.us", "michael.chapman@state.co.us", "nicholas.barlow@state.co.us"]
+RECIPIENT_EMAILS = "brendan.eckerman@state.co.us"
 
 # Email Subject & Body
 SUBJECT = f"Morning Weather Report - {todayst}"
