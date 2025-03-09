@@ -440,12 +440,12 @@ for i, row in log.iterrows():
     ax1.text(row['lon'], row['lat'], f'{int(row["accum"])}"', fontsize=60, ha='center', va='center', zorder=30, color='white', transform=ccrs.PlateCarree(), weight='bold')
 
 
-y = 15
+y = 14
 for i in log.index:
   loc = log.loc[i].name
   range_value = log.loc[i].range
   ax3.text(30, y, f'{loc}: {range_value}', fontsize=60, ha='left', style='italic')
-  y-=1.6
+  y-=1.8
 
 # WWA Legend setup
 
