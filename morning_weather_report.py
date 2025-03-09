@@ -425,12 +425,12 @@ ax3.text(1, 17, 'Key Messages:', fontsize=80, ha='left')
 ax3.text(30, 17, '48-Hr Forecasted Snow in High Traffic Areas', fontsize=80, ha='left')
 y = 14
 for i in range(len(afdtext)):
-    string = wrap_label(afdtext[i], width=70)
-    ax3.text(1, y, f'- {string}', fontsize=48, ha='left', style='italic')
+    string = wrap_label(afdtext[i], width=60)
+    ax3.text(1, y, f'- {string}', fontsize=54, ha='left', style='italic')
     if len(afdtext)<=3:
-        y-=3.5
+        y-=4.5
     else:
-        y-=3
+        y-=3.2
 ax3.axis('off')
 
 # Snow Forecast values
