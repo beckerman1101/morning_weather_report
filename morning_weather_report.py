@@ -423,11 +423,11 @@ ax3.set_xlim(0,50.7485)
 ax3.set_ylim(0,20)
 ax3.text(1, 17, 'Key Messages:', fontsize=80, ha='left')
 ax3.text(30, 17, '48-Hr Forecasted Snow in High Traffic Areas', fontsize=80, ha='left')
-y = 14
+y = 15
 for i in range(len(afdtext)):
     string = wrap_label(afdtext[i], width=65)
     ax3.text(1, y, f'- {string}', fontsize=50, ha='left', style='italic')
-    y-=3
+    y-=3.5
 ax3.axis('off')
 
 # Snow Forecast values
@@ -442,7 +442,7 @@ for i, row in log.iterrows():
     ax1.text(row['lon'], row['lat'], f'{int(row["accum"])}"', fontsize=60, ha='center', va='center', zorder=30, color='white', transform=ccrs.PlateCarree(), weight='bold')
 
 
-y = 14
+y = 15
 for i in log.index:
   loc = log.loc[i].name
   range_value = log.loc[i].range
