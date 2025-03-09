@@ -423,7 +423,7 @@ ax3.set_xlim(0,50.7485)
 ax3.set_ylim(0,20)
 ax3.text(1, 17, 'Key Messages:', fontsize=80, ha='left')
 ax3.text(30, 17, '48-Hr Forecasted Snow in High Traffic Areas', fontsize=80, ha='left')
-y = 15
+y = 14
 for i in range(len(afdtext)):
     string = wrap_label(afdtext[i], width=70)
     ax3.text(1, y, f'- {string}', fontsize=48, ha='left', style='italic')
