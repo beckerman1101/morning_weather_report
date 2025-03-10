@@ -172,7 +172,7 @@ black_cmap = ListedColormap([(0, 0, 0, 1)])
 #ChatGPT wrote this whole one except the last line. Generates a pretty little list out of the AFD text though
 
 afd_url = "https://forecast.weather.gov/product.php?site=BOU&issuedby=BOU&product=AFD&format=CI&version=1&glossary=1"
-response = requests.get(afd_url)
+response = requests.get(afd_url, stream=True)
 afd_text = response.text
 soup = BeautifulSoup(afd_text, "html.parser")
 clean_text = soup.get_text()
@@ -198,7 +198,7 @@ afdtext = messages_list[1:]
 url = 'https://tgftp.nws.noaa.gov/SL.us008001/DF.sha/DC.cap/DS.WWA/current_all.tar.gz'
 downloaded_file_path = os.path.join(base_dir, f'{todaystr}_wwa.tar.gz')
 extracted_folder = base_dir
-response = requests.get(url)
+response = requests.get(url, stream=True)
 with open(downloaded_file_path, 'wb') as f:
     f.write(response.content)
 print(f"File downloaded: {downloaded_file_path}")
