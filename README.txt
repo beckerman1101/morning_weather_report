@@ -1,4 +1,4 @@
-'CDOT MORNING WEATHER REPORT
+CDOT MORNING WEATHER REPORT
 
 This repository is set up to compile Colorado weather information from various NWS sources, then generate a graphic for daily distribution within the internal CDOT network for operational purposes. 
 
@@ -20,4 +20,4 @@ Snowfall data also gets interpolated for smoother plotting.
 Initializing and creating the figure is the longest chunk of the python script, between lines 345 and 506. This should always be the smoothest-running portion of the script. 
 Finally, functions are defined to send the generated .png file to a list of the necessary recipients within CDOTs network, mainly the weather team and managerial positions in the Division of Maintenance and Operations.
 
-The email only gets sent if there are more thna 4 inches of snowfall at any of the selected points from earlier in the next 48 hours, or 
+The email only gets sent if there are more than 4 inches of snowfall at any of the selected points from earlier in the next 48 hours, or 2 inches at those locations from midnight yesterday to midnight this morning. 
