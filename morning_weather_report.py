@@ -567,3 +567,5 @@ accum_trigger = log['accum'].values.max()
 if __name__ == "__main__":
     if fcst_trigger >= 4 or accum_trigger >= 2:
         send_email()
+    else:
+        print('Snow thresholds not met for distribution')
