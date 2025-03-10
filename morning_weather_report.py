@@ -520,7 +520,7 @@ SENDER_EMAIL = "beckerman1101@gmail.com"
 SENDER_PASSWORD = os.getenv('GMAIL_PW') # Use an App Password if 2FA is enabled
 
 # Recipient email
-RECIPIENT_EMAILS = ["brendan.eckerman@state.co.us", "michael.chapman@state.co.us", "nicholas.barlow@state.co.us","bob.fifer@state.co.us"]
+RECIPIENT_EMAILS = ["brendan.eckerman@state.co.us", "michael.chapman@state.co.us", "nicholas.barlow@state.co.us","bob.fifer@state.co.us","shawn.smith@state.co.us"]
 
 # Email Subject & Body
 SUBJECT = f"Morning Weather Report - {todayst}"
@@ -561,7 +561,9 @@ def send_email():
             print("Email sent successfully.")
     except Exception as e:
         print(f"Error sending email: {e}")
-
+fcst_trigger = log['fcst'].values.max()
+accum_trigger = log['accum'].values.max()
 # Main function to call the send_email function
 if __name__ == "__main__":
-    send_email()
+    if fcst_trigger >= 4 or accum_trigger >= 2:
+        send_email()
