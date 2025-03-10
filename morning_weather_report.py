@@ -426,11 +426,12 @@ ax3.text(30, 17, '48-Hr Forecasted Snow in High Traffic Areas', fontsize=80, ha=
 y = 14
 for i in range(len(afdtext)):
     string = wrap_label(afdtext[i], width=60)
+    length = len(string.split('\n'))
     ax3.text(1, y, f'- {string}', fontsize=54, ha='left', style='italic')
-    if len(afdtext)<=3:
-        y-=4.5
-    else:
-        y-=3.2
+    if length<=2:
+        y-=3.6
+    elif length>=3:
+        y-=5
 ax3.axis('off')
 
 # Snow Forecast values
@@ -519,7 +520,7 @@ SENDER_EMAIL = "beckerman1101@gmail.com"
 SENDER_PASSWORD = os.getenv('GMAIL_PW') # Use an App Password if 2FA is enabled
 
 # Recipient email
-RECIPIENT_EMAILS = ["brendan.eckerman@state.co.us", "michael.chapman@state.co.us", "nicholas.barlow@state.co.us"]
+RECIPIENT_EMAILS = ["brendan.eckerman@state.co.us", "michael.chapman@state.co.us", "nicholas.barlow@state.co.us","bob.fifer@state.co.us"]
 
 # Email Subject & Body
 SUBJECT = f"Morning Weather Report - {todayst}"
