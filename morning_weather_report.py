@@ -444,7 +444,7 @@ for i in range(len(afdtext)):
     elif length>=3 and i!=0:
         y-=4
         ax3.text(1, y, f'- {string}', fontsize=54, ha='left', style='italic')
-
+ax3.axis('off')
 # Snow Forecast values
 
 # Based on point data, creates a range. If snow is 0<x<=3, the range will be 2" around
