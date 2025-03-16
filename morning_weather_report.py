@@ -306,11 +306,8 @@ for i in range(len(table)):
     elif range_val<=3:
       buffer = 1
       ranges.append(f'{range_val-buffer}" - {range_val+buffer}"')
-    elif range_val<=8:
+    elif range_val>3:
       buffer = 2
-      ranges.append(f'{range_val-buffer}" - {range_val+buffer}"')
-    elif range_val>8:
-      buffer = 3
       ranges.append(f'{range_val-buffer}" - {range_val+buffer}"')
     lats.append(lat)
     lons.append(longi)
@@ -433,7 +430,7 @@ for i in range(len(afdtext)):
         y=15.5
         ax3.text(1, y, f'- {string}', fontsize=54, ha='left', style='italic')
     elif length>=3 and i==0:
-        y=13.5
+        y=13.25
         ax3.text(1, y, f'- {string}', fontsize=54, ha='left', style='italic')
     if length>=5 and i!=0:
         y-=5.5
