@@ -53,12 +53,11 @@ todaystr = today.strftime('%Y%m%d')
 mo = today.strftime('%Y%m')
 ts = today.strftime('%I:%M %p')
 
-# GitHub Configuration - Use environment variables instead of hardcoding credentials
-GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')  # Set this in your environment
-REPO_NAME = 'beckerman1101/daily_accum_mapping'  # Replace with your repository
+# GitHub Configuration
+GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')  
+REPO_NAME = 'beckerman1101/daily_accum_mapping'  
 BRANCH_NAME = 'main'
 
-# Download the file from the URL
 
 
 os.environ['SHAPE_RESTORE_SHX'] = 'YES'
@@ -167,9 +166,6 @@ black_cmap = ListedColormap([(0, 0, 0, 1)])
 
 #ChatGPT wrote this whole one except the last line. Generates a pretty little list out of the AFD text though
 
-#### ---- AFD QUERY ---- ####
-
-#ChatGPT wrote this whole one except the last line. Generates a pretty little list out of the AFD text though
 
 afd_url = "https://forecast.weather.gov/product.php?site=BOU&issuedby=BOU&product=AFD&format=CI&version=1&glossary=1"
 response = requests.get(afd_url, stream=True)
@@ -221,8 +217,6 @@ co['Warning Color'] = co['PROD_TYPE'].map(wwa_colors)
 co = co[pd.notna(co['Warning Color'])]
 co = co.reset_index(drop=True)
 
-"""### Query & process NDFD & Gridded snowfall analysis, assign values to points"""
-
 #### ---- NWS SNOWFALL DATA QUERIES ---- ####
 
 # The file formats are different and have to be handled as such
@@ -264,7 +258,7 @@ for i in range(len(ts_list)): # Extract month from date
     accum_url = f"https://www.nohrsc.noaa.gov/snowfall_v2/data/{mo}/sfav2_CONUS_6h_{ts_list[i]}.nc"
     accum_name = f'{ts_list[i]}_gridded.nc'
 
-    # Download file
+    
     response = requests.get(accum_url, stream=True)
     if response.status_code == 200:
         with open(accum_name, "wb") as file:
@@ -407,7 +401,7 @@ cbar.ax.yaxis.set_label_position("left")
 cbar.ax.yaxis.tick_left()
 cbar.ax.set_yticklabels(snow_labels)
 cbar.ax.tick_params(labelsize=50, pad=20)
-cax.set_anchor('W')  # Align the colorbar to the left
+cax.set_anchor('W')  
 
 # Quick text wrapping function
 
@@ -447,7 +441,7 @@ ax3.axis('off')
 
 # Based on point data, creates a range. If snow is 0<x<=3, the range will be 2" around
 # the value, so 2" will produce 1-3"
-# If 3<x<=8, the range is 4", and above 8", the range is 6"
+# If x>3, the range is 4"
 
 
 ax1.scatter(log['lon'], log['lat'], c=log['accum'], cmap=black_cmap, s=12500, zorder=25, edgecolors='black', transform=ccrs.PlateCarree())
@@ -474,10 +468,10 @@ for i in range(len(co)):
     wwa_ax.add_geometries(co.loc[i].geometry, fc=co.loc[i]['Warning Color'], crs=ccrs.PlateCarree())
 prod_types = co['PROD_TYPE'].unique()
 colors = [co[co['PROD_TYPE'] == pt]['Warning Color'].iloc[0] for pt in prod_types]
-# Step 3: Create legend handles with wrapped text
+
 if len(co) == 0:
     # If `co` is empty, create a legend saying "None"
-    legend_patches = [mpatches.Patch(color='gray', label='None')]  # You can change 'gray' to any color you prefer
+    legend_patches = [mpatches.Patch(color='gray', label='None')]  
 else:
     # If `co` is not empty, proceed with generating the legend as usual
     prod_types = co['PROD_TYPE'].unique()
@@ -526,7 +520,7 @@ SMTP_PORT = 587
 
 # Sender's email and App Password (for Gmail 2FA)
 SENDER_EMAIL = "beckerman1101@gmail.com"
-SENDER_PASSWORD = os.getenv('GMAIL_PW') # Use an App Password if 2FA is enabled
+SENDER_PASSWORD = os.getenv('GMAIL_PW')
 
 # Recipient email
 RECIPIENT_EMAILS = ["brendan.eckerman@state.co.us", "michael.chapman@state.co.us", "nicholas.barlow@state.co.us","bob.fifer@state.co.us","shawn.smith@state.co.us","james.fox@state.co.us"]
