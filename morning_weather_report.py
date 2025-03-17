@@ -427,7 +427,7 @@ for i in range(len(afdtext)):
         y=12.5
         ax3.text(1, y, f'- {string}', fontsize=54, ha='left', style='italic')
     elif length<=2 and i==0:
-        y=15.5
+        y=15
         ax3.text(1, y, f'- {string}', fontsize=54, ha='left', style='italic')
     elif length>=3 and i==0:
         y=13.25
