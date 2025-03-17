@@ -253,7 +253,8 @@ if pos1 is not None:
     pos = np.where(mask)[0][0]
 else:
     pos = -1
-snow_m = snow_fcst.isel(step=slice(0, pos)).unknown.sum(dim='step')
+end_slice = pos+1
+snow_m = snow_fcst.isel(step=slice(0, end_slice)).unknown.sum(dim='step')
 end = snow_fcst.step[pos].valid_time.values.astype('datetime64[s]').astype(datetime).replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/Denver")).strftime('%I%p %a')
 
 datasets = []  # List to store datasets
