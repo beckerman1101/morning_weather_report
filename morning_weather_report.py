@@ -527,7 +527,7 @@ RECIPIENT_EMAILS = ["brendan.eckerman@state.co.us", "michael.chapman@state.co.us
 
 # Email Subject & Body
 SUBJECT = f"Morning Weather Report - {todayst}"
-BODY = "Attached is today's Morning Weather Report. If you have questions or the report appears to have had issues in the process of its creation, please reach out to Brendan at brendan.eckerman@state.co.us"
+BODY = "Attached is today's Morning Weather Report. If you have questions or the report appears to have had issues in the process of its creation, please reach out to Brendan at brendan.eckerman@state.co.us\n\nPlease note that accumulated snowfall data is preliminary and has not been refined for quality control. It is also derived from radar data, which is susceptible to errors along terrain features."
 
 # Path to the PNG file
 ATTACHMENT_PATH = file_path # Update with your PNG file path
