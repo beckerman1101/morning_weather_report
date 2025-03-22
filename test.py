@@ -428,6 +428,9 @@ snow_accumulation = xr.DataArray(
     coords={"lat": target_lat, "lon": target_lon}
 )
 
+df1 = 39.3701*snow_m
+df3 = snow_accumulation
+
 table_file = os.path.join(base_dir, 'fcst_locations.csv')
 table = pd.read_csv(table_file)
 lats_lons = np.vstack([df1['latitude'].values.ravel(), df1['longitude'].values.ravel()]).T
@@ -439,8 +442,8 @@ for i in range(len(table)):
     longi = table.loc[i].lon
     coords = np.array([[lat, lon]])
     dist, index = kdtree.query(coords)
-    val = snow_accumulation.sel(lat=lat, method='nearest').sel(lon=lon, method='nearest').values.max()
-    fcst_val = df2.sel(lat=lat, method='nearest').sel(lon=longi, method='nearest').values.max()
+    loc = df1.isel(y=index[0] // df1.sizes['x'], x=index[0] % df1.sizes['x'])
+    fcst_val = df3.sel(lat=lat, method='nearest').sel(lon=longi, method='nearest').values.max()
     range_val = round(val)
     if range_val==0:
       ranges.append('0"')
