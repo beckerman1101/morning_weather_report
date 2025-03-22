@@ -41,6 +41,7 @@ import re
 import textwrap
 from skimage.transform import resize
 from awips.dataaccess import DataAccessLayer
+from scipy.interpolate import griddata
 from github import Github
 
 # These strings are how every export is labeled, as well as the title
