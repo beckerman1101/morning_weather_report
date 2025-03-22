@@ -444,8 +444,8 @@ for i in range(len(table)):
     dist, index = kdtree.query(coords)
     loc = df1.isel(y=index[0] // df1.sizes['x'], x=index[0] % df1.sizes['x'])
     fcst_val = df3.sel(lat=lat, method='nearest').sel(lon=longi, method='nearest').values.max()
-    range_val = round(val)
     val = loc.values.max()
+    range_val = round(val)
     if range_val==0:
       ranges.append('0"')
     elif range_val<=3:
