@@ -379,37 +379,6 @@ nohrsc_inches = nohrsc_regridded * 39.3701
 total_snowfall = nbm_inches + nohrsc_inches
 
 df1 = 39.3701*snow_m
-df2 = total_snowfall
-
-table_file = os.path.join(base_dir, 'fcst_locations.csv')
-table = pd.read_csv(table_file)
-lats_lons = np.vstack([df1['latitude'].values.ravel(), df1['longitude'].values.ravel()]).T
-kdtree = cKDTree(lats_lons)
-lats, lons, vals, ranges, fcst= [], [], [], [], []
-for i in range(len(table)):
-    lat = table.loc[i].lat
-    lon = (360 + table.loc[i].lon)
-    longi = table.loc[i].lon
-    coords = np.array([[lat, lon]])
-    dist, index = kdtree.query(coords)
-    loc = df1.isel(y=index[0] // df1.sizes['x'], x=index[0] % df1.sizes['x'])
-    fcst_val = df2.sel(lat=lat, method='nearest').sel(lon=longi, method='nearest').values.max()
-    val = loc.values.max()
-    range_val = round(val)
-    if range_val==0:
-      ranges.append('0"')
-    elif range_val<=3:
-      buffer = 1
-      ranges.append(f'{range_val-buffer}" - {range_val+buffer}"')
-    elif range_val>3:
-      buffer = 2
-      ranges.append(f'{range_val-buffer}" - {range_val+buffer}"')
-    lats.append(lat)
-    lons.append(longi)
-    vals.append(val)
-    fcst.append(fcst_val)
-log = pd.DataFrame({'lat': lats, 'lon': lons, 'fcst': vals, 'accum':fcst, 'range':ranges}, index=table.location.values)
-
 
 inter_factor = 8
 new_lon = np.linspace(df1.y[0].item(), df1.y[-1].item(), df1.sizes["y"] * inter_factor)
@@ -458,6 +427,35 @@ snow_accumulation = xr.DataArray(
     dims=["lat", "lon"],
     coords={"lat": target_lat, "lon": target_lon}
 )
+
+df1 = snow_accumulation
+table_file = os.path.join(base_dir, 'fcst_locations.csv')
+table = pd.read_csv(table_file)
+lats_lons = np.vstack([df1['latitude'].values.ravel(), df1['longitude'].values.ravel()]).T
+kdtree = cKDTree(lats_lons)
+lats, lons, vals, ranges, fcst= [], [], [], [], []
+for i in range(len(table)):
+    lat = table.loc[i].lat
+    lon = (360 + table.loc[i].lon)
+    longi = table.loc[i].lon
+    coords = np.array([[lat, lon]])
+    dist, index = kdtree.query(coords)
+    val = df1.sel(lat=lat, method='nearest').sel(lon=lon, method='nearest').values.max()
+    fcst_val = df2.sel(lat=lat, method='nearest').sel(lon=longi, method='nearest').values.max()
+    range_val = round(val)
+    if range_val==0:
+      ranges.append('0"')
+    elif range_val<=3:
+      buffer = 1
+      ranges.append(f'{range_val-buffer}" - {range_val+buffer}"')
+    elif range_val>3:
+      buffer = 2
+      ranges.append(f'{range_val-buffer}" - {range_val+buffer}"')
+    lats.append(lat)
+    lons.append(longi)
+    vals.append(val)
+    fcst.append(fcst_val)
+log = pd.DataFrame({'lat': lats, 'lon': lons, 'fcst': vals, 'accum':fcst, 'range':ranges}, index=table.location.values)
 
 
 """## Generate the Report
