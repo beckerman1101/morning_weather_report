@@ -40,7 +40,7 @@ from bs4 import BeautifulSoup
 import re
 import textwrap
 from skimage.transform import resize
-
+from awips.dataaccess import DataAccessLayer
 from github import Github
 
 # These strings are how every export is labeled, as well as the title
@@ -265,7 +265,7 @@ for cycle in grid_cycles:
     ref_time = cycle.getRefTime()
     ref_time_str = str(ref_time)
     ref_time_datetime = datetime.strptime(ref_time_str, "%Y-%m-%d %H:%M:%S.%f")
-    if ref_time_datetime.hour == 18:
+    if ref_time_datetime.hour == 21:
         grid_06z = cycle
         break
 if grid_06z is not None:
