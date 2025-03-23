@@ -25,15 +25,33 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
-
+        
       # Step 4: Run the report script (first attempt)
       - name: Run Report script (first attempt)
         id: attempt1
         env: 
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
           GMAIL_PW: ${{ secrets.GMAIL_PW }}
-        run: python test.py
+        run: python morning_weather_report.py
         continue-on-error: true  # Allows failure without stopping the workflow
 
+      - name: Wait before retrying
+        if: steps.attempt1.outcome == 'failure'
+        run: powershell Start-Sleep -Seconds 300  # 300 seconds = 5 minutes
+
+      # Step 6: Retry the script if the first attempt failed
+      - name: Run Report script (retry)
+        if: steps.attempt1.outcome == 'failure'
+        env: 
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          GMAIL_PW: ${{ secrets.GMAIL_PW }}
+        run: python morning_weather_report.py
+        continue-on-error: true
+
+      - name: Run test script
+        env: 
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          GMAIL_PW: ${{ secrets.GMAIL_PW }}
+        run: python test.py
+        continue-on-error: true
       # Step 5: Wait for 5 minutes before retrying
