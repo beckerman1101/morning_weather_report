@@ -266,14 +266,14 @@ for cycle in grid_cycles:
     ref_time = cycle.getRefTime()
     ref_time_str = str(ref_time)
     ref_time_datetime = datetime.strptime(ref_time_str, "%Y-%m-%d %H:%M:%S.%f")
-    if ref_time_datetime.hour == 21:
+    if ref_time_datetime.hour == 6:
         grid_06z = cycle
         break
 if grid_06z is not None:
     grid_fcstRun = DataAccessLayer.getForecastRun(grid_06z, grid_times)
-    print(f"Successfully selected 18Z run: {grid_06z}")
+    print(f"Successfully selected 06Z run: {grid_06z}")
 else:
-    print("No 18Z cycle found in the available grid cycles.")
+    print("No 06Z cycle found in the available grid cycles.")
 
 first_six_times = grid_fcstRun[:6]  # Get first six timesteps
 
