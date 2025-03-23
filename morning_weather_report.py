@@ -40,7 +40,10 @@ from bs4 import BeautifulSoup
 import re
 import textwrap
 from skimage.transform import resize
+from awips.dataaccess import DataAccessLayer
+from scipy.interpolate import griddata
 from github import Github
+
 
 # These strings are how every export is labeled, as well as the title
 
@@ -251,14 +254,68 @@ end_slice = pos+1
 snow_m = snow_fcst.isel(step=slice(0, end_slice)).unknown.sum(dim='step')
 end = snow_fcst.step[pos].valid_time.values.astype('datetime64[s]').astype(datetime).replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/Denver")).strftime('%I%p %a')
 
-datasets = []  # List to store datasets
-datasets = []
-ts_list = [yesterdaystr+'12', yesterdaystr+'18', todaystr+'00', todaystr+'06']
-for i in range(len(ts_list)): # Extract month from date
-    accum_url = f"https://www.nohrsc.noaa.gov/snowfall_v2/data/{mo}/sfav2_CONUS_6h_{ts_list[i]}.nc"
-    accum_name = f'{ts_list[i]}_gridded.nc'
+edexServer = "edex-cloud.unidata.ucar.edu"
+DataAccessLayer.changeEDEXHost(edexServer)
+grid_request = DataAccessLayer.newDataRequest()
+grid_request.setDatatype("grid")
+grid_request.setLocationNames("NationalBlend")
+grid_request.setParameters("TOTSN1hr")
+grid_cycles = DataAccessLayer.getAvailableTimes(grid_request, True)
+grid_times = DataAccessLayer.getAvailableTimes(grid_request)
+grid_06z = None
+for cycle in grid_cycles:
+    ref_time = cycle.getRefTime()
+    ref_time_str = str(ref_time)
+    ref_time_datetime = datetime.strptime(ref_time_str, "%Y-%m-%d %H:%M:%S.%f")
+    if ref_time_datetime.hour == 6:
+        grid_06z = cycle
+        break
+if grid_06z is not None:
+    grid_fcstRun = DataAccessLayer.getForecastRun(grid_06z, grid_times)
+    print(f"Successfully selected 06Z run: {grid_06z}")
+else:
+    print("No 06Z cycle found in the available grid cycles.")
 
-    
+first_six_times = grid_fcstRun[:6]  # Get first six timesteps
+
+# Step 5: Request grid data for selected timesteps
+nbm_response = DataAccessLayer.getGridData(grid_request, first_six_times)
+
+snowfall_data_list = []
+
+for grid in nbm_response:
+    snowfall_data = np.array(grid.getRawData())
+    # Get lat/lon coordinates directly from the grid
+    lats, lons = grid.getLatLonCoords()
+
+    # Since the data is rotated, we need to swap the lats and lons
+    lats, lons = lons, lats  # Swap latitude and longitude values
+    # Append the snowfall data
+    snowfall_data_list.append(snowfall_data)
+
+# Step 7: Combine and sum over the first six timesteps
+if snowfall_data_list:
+    snow_accum = np.sum(snowfall_data_list, axis=0)  # Sum over time dimension (axis 0)
+
+    # Create the final xarray DataArray with explicit dimension names
+    da = xr.DataArray(
+        snow_accum,
+        coords={"lat": (["y", "x"], lats), "lon": (["y", "x"], lons)},  # Use different dimension names
+        dims=["y", "x"]
+    )
+    print("Successfully summed first six timesteps of NAM snowfall.")
+else:
+    print("No data available.")
+
+# List of timestamps to download
+ts_list = [yesterdaystr + '12', yesterdaystr + '18', todaystr + '00', todaystr + '06']
+
+# Download and process NOHRSC data
+datasets = []
+for timestamp in ts_list:
+    accum_url = f"https://www.nohrsc.noaa.gov/snowfall_v2/data/{mo}/sfav2_CONUS_6h_{timestamp}.nc"
+    accum_name = f'{timestamp}_gridded.nc'
+
     response = requests.get(accum_url, stream=True)
     if response.status_code == 200:
         with open(accum_name, "wb") as file:
@@ -269,17 +326,111 @@ for i in range(len(ts_list)): # Extract month from date
         # Open the dataset
         ds = xr.open_dataset(accum_name)
         datasets.append(ds)
+    else:
+        print(f"Failed to download: {accum_url}")
 
 # Combine datasets and sum over time
 if datasets:
-    snow_accum = xr.concat(datasets, dim="time").sum(dim="time")
-    print("Successfully combined and summed snowfall datasets")
+    snow_accum_nohrsc = xr.concat(datasets, dim="time").sum(dim="time")
+    print("Successfully combined and summed NOHRSC snowfall datasets")
 else:
     print("No files were successfully downloaded.")
 
+nbm = da
+nohrsc = snow_accum_nohrsc
+
+
+# Extract 2D coordinates from nbm
+nbm_lat = nbm['lat'].values  # Shape: (y, x)
+nbm_lon = nbm['lon'].values  # Shape: (y, x)
+
+# Extract coordinates and data from nohrsc
+nohrsc_lat = nohrsc['lat'].values  # Shape: (lat,)
+nohrsc_lon = nohrsc['lon'].values  # Shape: (lon,)
+nohrsc_data = nohrsc['Data'].values  # Shape: (lat, lon)
+
+# Create a grid for nohrsc's coordinates
+nohrsc_lat_grid, nohrsc_lon_grid = np.meshgrid(nohrsc_lat, nohrsc_lon, indexing='ij')  # Shape: (lat, lon)
+
+# Flatten the nohrsc grid and data
+nohrsc_points = np.column_stack((nohrsc_lat_grid.ravel(), nohrsc_lon_grid.ravel()))  # Shape: (lat*lon, 2)
+nohrsc_values = nohrsc_data.ravel()  # Shape: (lat*lon,)
+
+# Interpolate nohrsc onto nbm's grid
+nohrsc_regridded = griddata(
+    nohrsc_points,  # Source points (flattened lat/lon)
+    nohrsc_values,  # Source data (flattened)
+    (nbm_lat, nbm_lon),  # Target grid (nbm's 2D lat/lon)
+    method='linear',  # Interpolation method
+    fill_value=np.nan  # Fill missing values with NaN
+)
+
+# Convert back to xarray DataArray
+nohrsc_regridded = xr.DataArray(
+    nohrsc_regridded,
+    dims=["y", "x"],
+    coords={"lat": (["y", "x"], nbm_lat), "lon": (["y", "x"], nbm_lon)}
+)
+
+# Ensure the units are consistent (both in inches)
+nbm_inches = nbm * 39.3701
+nohrsc_inches = nohrsc_regridded * 39.3701
+
+# Sum the datasets
+total_snowfall = nbm_inches + nohrsc_inches
+
 df1 = 39.3701*snow_m
-df2 = 39.3701*snow_accum
-df3 = df2.Data
+
+inter_factor = 8
+new_lon = np.linspace(df1.y[0].item(), df1.y[-1].item(), df1.sizes["y"] * inter_factor)
+new_lat = np.linspace(df1.x[0].item(), df1.x[-1].item(), df1.sizes["x"] * inter_factor)
+snow_forecast = df1.interp(x=new_lat, y=new_lon)
+
+
+df_co = total_snowfall.where(
+    (total_snowfall.lat >= co_bounds[2]) &
+    (total_snowfall.lat <= co_bounds[3]) &
+    (total_snowfall.lon >= co_bounds[0]) &
+    (total_snowfall.lon <= co_bounds[1]),
+    drop=True
+)
+
+# Get the number of latitude and longitude points in the filtered data
+latlen = len(df_co.lat)
+lonlen = len(df_co.lon)
+
+# Define the interpolation factor
+inter_factor = 10
+
+# Create target latitude and longitude arrays
+target_lat = np.linspace(co_bounds[2], co_bounds[3], latlen * inter_factor)
+target_lon = np.linspace(co_bounds[0], co_bounds[1], lonlen * inter_factor)
+
+# Flatten the original coordinates and data
+points = np.column_stack((df_co.lat.values.ravel(), df_co.lon.values.ravel()))  # Shape: (y*x, 2)
+values = df_co.values.ravel()  # Shape: (y*x,)
+
+# Create a grid for the target coordinates
+target_lat_grid, target_lon_grid = np.meshgrid(target_lat, target_lon, indexing='ij')  # Shape: (lat, lon)
+
+# Interpolate onto the target grid
+snow_accumulation = griddata(
+    points,  # Source points (flattened lat/lon)
+    values,  # Source data (flattened)
+    (target_lat_grid, target_lon_grid),  # Target grid
+    method='linear',  # Interpolation method
+    fill_value=np.nan  # Fill missing values with NaN
+)
+
+# Convert back to xarray DataArray
+snow_accumulation = xr.DataArray(
+    snow_accumulation,
+    dims=["lat", "lon"],
+    coords={"lat": target_lat, "lon": target_lon}
+)
+
+df1 = 39.3701*snow_m
+df3 = snow_accumulation
 
 table_file = os.path.join(base_dir, 'fcst_locations.csv')
 table = pd.read_csv(table_file)
@@ -310,20 +461,6 @@ for i in range(len(table)):
     fcst.append(fcst_val)
 log = pd.DataFrame({'lat': lats, 'lon': lons, 'fcst': vals, 'accum':fcst, 'range':ranges}, index=table.location.values)
 
-
-inter_factor = 8
-new_lon = np.linspace(df1.y[0].item(), df1.y[-1].item(), df1.sizes["y"] * inter_factor)
-new_lat = np.linspace(df1.x[0].item(), df1.x[-1].item(), df1.sizes["x"] * inter_factor)
-snow_forecast = df1.interp(x=new_lat, y=new_lon)
-
-
-df_co = df2.where(df2.lat>=co_bounds[2], drop=True).where(df2.lat<=co_bounds[3], drop=True).where(df2.lon>=co_bounds[0], drop=True).where(df2.lon<=co_bounds[1], drop=True)
-latlen = len(df_co.lat)
-lonlen = len(df_co.lon)
-inter_factor = 8
-target_lat = np.linspace(co_bounds[2], co_bounds[3], latlen*inter_factor)
-target_lon = np.linspace(co_bounds[0], co_bounds[1], lonlen*inter_factor)
-snow_accumulation = df_co['Data'].interp(lat=target_lat, lon=target_lon, method='linear')
 
 
 """## Generate the Report
