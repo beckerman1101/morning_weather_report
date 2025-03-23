@@ -2,7 +2,7 @@ name: Run Python Script Daily
 
 on:
   schedule:
-    - cron: '45 10 * * *'  # Runs daily at 12:30 UTC
+    - cron: '45 10 * * *'  # Runs daily at 10:45 UTC
   workflow_dispatch:  # Allows manual execution
 
 jobs:
@@ -14,44 +14,67 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 4: Set up Python
+      # Step 2: Set up Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'  # Specify the version of Python
 
-      # Step 5: Install dependencies
+      # Step 3: Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-        
-      # Step 4: Run the report script (first attempt)
-      - name: Run Report script (first attempt)
+
+      # Step 4: Run the report script (Attempt 1)
+      - name: Run Report script (Attempt 1)
         id: attempt1
         env: 
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
           GMAIL_PW: ${{ secrets.GMAIL_PW }}
         run: python morning_weather_report.py
-        continue-on-error: true  # Allows failure without stopping the workflow
+        continue-on-error: true  
 
-      - name: Wait before retrying
+      # Step 5: Wait before retrying (if Attempt 1 fails)
+      - name: Wait before Retry 2
         if: steps.attempt1.outcome == 'failure'
-        run: powershell Start-Sleep -Seconds 300  # 300 seconds = 5 minutes
+        run: powershell Start-Sleep -Seconds 300  # 5-minute delay
 
-      # Step 6: Retry the script if the first attempt failed
-      - name: Run Report script (retry)
+      # Step 6: Run the report script (Attempt 2)
+      - name: Run Report script (Attempt 2)
+        id: attempt2
         if: steps.attempt1.outcome == 'failure'
         env: 
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
           GMAIL_PW: ${{ secrets.GMAIL_PW }}
         run: python morning_weather_report.py
-        continue-on-error: true
+        continue-on-error: true  
 
-      - name: Run test script
+      # Step 7: Wait before retrying (if Attempt 2 fails)
+      - name: Wait before Retry 3
+        if: steps.attempt2.outcome == 'failure'
+        run: powershell Start-Sleep -Seconds 300  # 5-minute delay
+
+      # Step 8: Run the report script (Attempt 3)
+      - name: Run Report script (Attempt 3)
+        id: attempt3
+        if: steps.attempt2.outcome == 'failure'
         env: 
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
           GMAIL_PW: ${{ secrets.GMAIL_PW }}
-        run: python test.py
-        continue-on-error: true
-      # Step 5: Wait for 5 minutes before retrying
+        run: python morning_weather_report.py
+        continue-on-error: true  
+
+      # Step 9: Final Wait before last attempt
+      - name: Wait before Final Retry
+        if: steps.attempt3.outcome == 'failure'
+        run: powershell Start-Sleep -Seconds 300  # 5-minute delay
+
+      # Step 10: Final attempt if all previous attempts failed
+      - name: Run Report script (Final Attempt)
+        id: final_attempt
+        if: steps.attempt3.outcome == 'failure'
+        env: 
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          GMAIL_PW: ${{ secrets.GMAIL_PW }}
+        run: python morning_weather_report.py
