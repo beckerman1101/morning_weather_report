@@ -304,8 +304,8 @@ if grid_06z is not None:
     else:
         print("No data available.")
 
-    else:
-        print("No 06Z cycle found in the available grid cycles.")
+else:
+    print("No 06Z cycle found in the available grid cycles.")
 
 # List of timestamps to download
 ts_list = [yesterdaystr + '12', yesterdaystr + '18', todaystr + '00', todaystr + '06']
