@@ -374,26 +374,34 @@ if total_snowfall is not None:
         drop=True
     )
 
-    latlen, lonlen = len(df_co.lat), len(df_co.lon)
-    inter_factor = 10
-
     target_lat = np.linspace(co_bounds[2], co_bounds[3], latlen * inter_factor)
     target_lon = np.linspace(co_bounds[0], co_bounds[1], lonlen * inter_factor)
 
-    points = np.column_stack((df_co.lat.values.ravel(), df_co.lon.values.ravel()))
-    values = df_co.values.ravel()
-
+# Create a meshgrid for the target grid
     target_lat_grid, target_lon_grid = np.meshgrid(target_lat, target_lon, indexing='ij')
 
+# Create a consistent grid for df_co lat/lon
+    lat_grid, lon_grid = np.meshgrid(df_co.lat, df_co.lon, indexing='ij')
+
+# Flatten the grids for interpolation
+    points = np.column_stack((lat_grid.ravel(), lon_grid.ravel()))
+    values = df_co.values.ravel()
+
+# Perform interpolation
     snow_accumulation = griddata(
-        points, values, (target_lat_grid, target_lon_grid),
-        method='linear', fill_value=np.nan
+        points,  # Source points
+        values,  # Source data
+        (target_lat_grid, target_lon_grid),  # Target grid
+        method='linear',  # Interpolation method
+        fill_value=np.nan  # Fill missing values with NaN
     )
 
-    snow_accumulation = xr.DataArray(
-        snow_accumulation, dims=["lat", "lon"],
-        coords={"lat": target_lat, "lon": target_lon}
-    )
+# Convert back to xarray DataArray
+snow_accumulation = xr.DataArray(
+    snow_accumulation,
+    dims=["lat", "lon"],
+    coords={"lat": target_lat, "lon": target_lon}
+)
 
     print("Final snowfall accumulation calculated.")
 else:
@@ -632,7 +640,7 @@ SENDER_EMAIL = "beckerman1101@gmail.com"
 SENDER_PASSWORD = os.getenv('GMAIL_PW')
 
 # Recipient email
-RECIPIENT_EMAILS = ["brendan.eckerman@state.co.us", "michael.chapman@state.co.us", "nicholas.barlow@state.co.us","bob.fifer@state.co.us","shawn.smith@state.co.us","james.fox@state.co.us"]
+RECIPIENT_EMAILS = ["brendan.eckerman@state.co.us"]
 
 # Email Subject & Body
 SUBJECT = f"Morning Weather Report - {todayst}"
