@@ -397,13 +397,13 @@ if total_snowfall is not None:
     )
 
 # Convert back to xarray DataArray
-snow_accumulation = xr.DataArray(
-    snow_accumulation,
-    dims=["lat", "lon"],
-    coords={"lat": target_lat, "lon": target_lon}
-)
+    snow_accumulation = xr.DataArray(
+        snow_accumulation,
+        dims=["lat", "lon"],
+        coords={"lat": target_lat, "lon": target_lon}
+    )
 
-    print("Final snowfall accumulation calculated.")
+        print("Final snowfall accumulation calculated.")
 else:
     print("No snowfall data available. Snow accumulation cannot be calculated.")
     snow_accumulation = None
