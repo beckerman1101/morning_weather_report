@@ -403,7 +403,7 @@ if total_snowfall is not None:
         coords={"lat": target_lat, "lon": target_lon}
     )
 
-        print("Final snowfall accumulation calculated.")
+    print("Final snowfall accumulation calculated.")
 else:
     print("No snowfall data available. Snow accumulation cannot be calculated.")
     snow_accumulation = None
