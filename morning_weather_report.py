@@ -254,6 +254,7 @@ end_slice = pos+1
 snow_m = snow_fcst.isel(step=slice(0, end_slice)).unknown.sum(dim='step')
 end = snow_fcst.step[pos].valid_time.values.astype('datetime64[s]').astype(datetime).replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/Denver")).strftime('%I%p %a')
 
+da = None
 edexServer = "edex-cloud.unidata.ucar.edu"
 DataAccessLayer.changeEDEXHost(edexServer)
 grid_request = DataAccessLayer.newDataRequest()
