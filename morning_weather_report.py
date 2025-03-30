@@ -274,6 +274,7 @@ for cycle in grid_cycles:
 if grid_06z is not None:
     grid_fcstRun = DataAccessLayer.getForecastRun(grid_06z, grid_times)
     print(f"Successfully selected 06Z run: {grid_06z}")
+    accum_end = '6am'
     first_six_times = grid_fcstRun[:6]  # Get first six timesteps
 
 # Step 5: Request grid data for selected timesteps
@@ -307,6 +308,7 @@ if grid_06z is not None:
 
 else:
     print("No 06Z cycle found in the available grid cycles.")
+    accum_end = '12am'
 
 # List of timestamps to download
 ts_list = [yesterdaystr + '12', yesterdaystr + '18', todaystr + '00', todaystr + '06']
@@ -536,7 +538,7 @@ accum_map = snow_accumulation.plot(ax=ax1, x='lon', y='lat', transform=ccrs.Plat
                               cmap=cmaps, norm=norms, add_colorbar=False)
 fcst_map = snow_forecast.plot(ax=ax2, x='longitude', y='latitude', transform=ccrs.PlateCarree(),
                               cmap=cmaps, norm=norms, add_colorbar=False)
-ax1.set_title('Snowfall Accumulation: 12am yesterday - 6am today', x=0, fontsize=70, ha='left', style='italic', pad=20)
+ax1.set_title(f'Snowfall Accumulation: 12am yesterday - {accum_end} today', x=0, fontsize=70, ha='left', style='italic', pad=20)
 ax2.set_title(f'Forecasted Snowfall through {end}', x=0, fontsize=70, ha='left', style='italic', pad=20)
 
 # Setting up the snow colorbar
