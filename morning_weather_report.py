@@ -341,7 +341,7 @@ else:
     print("No files were successfully downloaded.")
 
 
-if da!=None:
+if da is not None:
     nbm = da
 # Extract 2D coordinates from nbm
     nbm_lat = nbm['lat'].values  # Shape: (y, x)
