@@ -26,9 +26,10 @@ jobs:
       # Step 3: Install GDAL and dependencies
       - name: Install dependencies
         run: |
-          conda install -c conda-forge gdal -y
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
+          conda install -c conda-forge gdal pyogrio -y
+          pip install PyGithub
+          grep -v "^gdal$" requirements.txt | grep -v "^pyogrio$" > temp_requirements.txt || true
+          pip install -r temp_requirements.txt
       
       # Step 4: Run the report script (Attempt 1)
       - name: Run Report script (Attempt 1)
