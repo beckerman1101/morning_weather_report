@@ -19,6 +19,12 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'  # Specify the version of Python
+      - name: Install GDAL
+        run: sudo apt-get update && sudo apt-get install -y gdal-bin libgdal-dev
+        env:
+          CPLUS_INCLUDE_PATH: /usr/include/gdal
+          C_INCLUDE_PATH: /usr/include/gdal
+
 
       # Step 3: Install dependencies
       - name: Install dependencies
