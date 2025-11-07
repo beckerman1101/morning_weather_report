@@ -1,54 +1,57 @@
-appdirs==1.4.4
-atomicwrites==1.4.0
-backcall==0.2.0
-beautifulsoup4==4.12.2
-Cartopy==0.24.1
-cfgrib==0.9.15.0
-cmasher==1.9.2
-colorspacious==1.1.2
-cryptography==44.0.1
-eccodes==2.39.2
-findlibs==0.1.0
-GDAL==3.8.4
-geopandas==1.0.1
-gitpython==3.1.43
-google-api-core==2.24.1
-google-api-python-client==2.161.0
-google-auth==2.38.0
-google-auth-httplib2==0.2.0
-google-auth-oauthlib==1.2.1
-googleapis-common-protos==1.68.0
-h5netcdf==1.5.0
-httplib2==0.22.0
-ipython==8.12.3
-jsonpointer==2.1
-matplotlib==3.10.0
-numpy==2.2.3
-oauthlib==3.2.2
-pandas==2.2.3
-paramiko==3.5.1
-proto-plus==1.26.0
-protobuf==4.25.3
-pyasn1-modules==0.2.8
-pygithub==2.6.1
-pyls-spyder==0.4.0
-pyogrio==0.10.1
-PyQt5==5.15.10
-PyQtWebEngine==5.15.6
-python-awips
-Requests==2.32.3
-requests-oauthlib==2.0.0
-rsa==4.9
-scipy==1.15.2
-sendgrid
-setuptools==75.1.0
-Shapely==2.0.7
+# Core utilities
+appdirs
+atomicwrites
+backcall
+beautifulsoup4
+tqdm
+requests
+requests-oauthlib
+oauthlib
+rsa
+cryptography
+paramiko
+
+# Scientific stack
+numpy
+scipy
+pandas
+xarray
+matplotlib
 scikit-image
-tqdm==4.66.5
-uritemplate==4.1.1
-wheel==0.44.0
-xarray==2025.01.2
-yarg==0.1.9
+cmasher
+colorspacious
 
+# Geospatial stack
+geopandas
+shapely
+cartopy
+gdal
+pyogrio
+cfgrib
+eccodes
+findlibs
+h5netcdf
 
+# Google / API / Git
+gitpython
+google-api-core
+google-api-python-client
+google-auth
+google-auth-httplib2
+google-auth-oauthlib
+googleapis-common-protos
+proto-plus
+protobuf
 
+# UI / development
+pyqt5
+pyqtwebengine
+ipython
+pyls-spyder
+
+# Misc / optional
+python-awips
+sendgrid
+setuptools
+wheel
+yarg
