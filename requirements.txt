@@ -31,7 +31,7 @@ protobuf==4.25.3
 pyasn1-modules==0.2.8
 pygithub==2.6.1
 pyls-spyder==0.4.0
-pyogrio==0.10.0
+pyogrio>=0.10.0
 PyQt5==5.15.10
 PyQtWebEngine==5.15.6
 python-awips
@@ -48,3 +48,4 @@ uritemplate==4.1.1
 wheel==0.44.0
 xarray==2025.01.2
 yarg==0.1.9
+
