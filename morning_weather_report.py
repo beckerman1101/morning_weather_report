@@ -265,79 +265,75 @@ today = datetime.now(ZoneInfo('America/Denver'))
 date_str = today.strftime('%Y%m%d')
 
 # Try to get the 06Z cycle NBM data
+import xarray as xr
+import rioxarray as rxr
+import requests
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+import os
+from io import BytesIO
+
+# Get today's date
+today = datetime.now(ZoneInfo('America/Denver'))
+now_utc = datetime.now(ZoneInfo('UTC'))
+
 da = None
 accum_end = '12am'
 
 try:
-    print("Attempting to retrieve NBM data from AWS S3...")
+    print("Attempting to retrieve NBM data from AWS S3 (GeoTIFF)...")
     
-    # NBM runs at 00Z, 06Z, 12Z, 18Z
-    # We want the most recent 06Z run
-    base_url = "https://noaa-nbm-grib2-pds.s3.amazonaws.com"
-    
-    # Determine which 06Z cycle to use (today's or yesterday's)
-    now_utc = datetime.now(ZoneInfo('UTC'))
+    # Determine which date to use
+    # If it's before 6 AM UTC, use yesterday's data
     if now_utc.hour < 6:
-        # Use yesterday's 06Z
-        cycle_date = (now_utc - timedelta(days=1)).strftime('%Y%m%d')
+        cycle_date = (now_utc - timedelta(days=1)).strftime('%Y/%m/%d')
     else:
-        # Use today's 06Z
-        cycle_date = now_utc.strftime('%Y%m%d')
+        cycle_date = now_utc.strftime('%Y/%m/%d')
     
-    cycle = "06"
-    region = "co"  # CONUS
+    # Build the URL for the 6-hour accumulation ending at 12Z (6am MST)
+    # Format: blendv4.3_conus_snowamt06_YYYY-MM-DDTHH:MM_YYYY-MM-DDTHH:MM.tif
+    base_url = "https://noaa-nbm-pds.s3.amazonaws.com"
     
-    # Download first 6 hourly forecasts (f001 through f006)
-    snowfall_data_list = []
+    # The file you referenced is for 06Z to 12Z (6 hours)
+    start_time = f"{cycle_date.replace('/', '-')}T06:00"
+    end_time = f"{cycle_date.replace('/', '-')}T12:00"
     
-    for hour in range(1, 7):
-        forecast_hour = f"{hour:03d}"
-        file_url = f"{base_url}/blend.{cycle_date}/{cycle}/core/blend.t{cycle}z.core.f{forecast_hour}.{region}.grib2"
-        
-        print(f"Downloading f{forecast_hour}...")
-        response = requests.get(file_url, timeout=30)
-        
-        if response.status_code == 200:
-            # Save temporarily
-            temp_file = f"nbm_f{forecast_hour}.grib2"
-            with open(temp_file, 'wb') as f:
-                f.write(response.content)
-            
-            # Open with xarray and extract snowfall
-            ds = xr.open_dataset(temp_file, engine='cfgrib', 
-                                filter_by_keys={'shortName': 'tsnowp'})  # Total snowfall
-            
-            snowfall_data_list.append(ds)
-            
-            # Clean up temp file
-            os.remove(temp_file)
-        else:
-            print(f"Failed to download f{forecast_hour}: Status {response.status_code}")
-            raise Exception(f"Download failed for forecast hour {forecast_hour}")
+    file_url = f"{base_url}/blendv4.3/conus/{cycle_date}/0600/snowamt06/blendv4.3_conus_snowamt06_{start_time}_{end_time}.tif"
     
-    # Combine and sum the datasets
-    if snowfall_data_list:
-        # Sum snowfall over all timesteps
-        snow_accum = sum([ds['tsnowp'] for ds in snowfall_data_list])
+    print(f"Downloading from: {file_url}")
+    
+    # Download the file
+    response = requests.get(file_url, timeout=60)
+    response.raise_for_status()
+    
+    # Read directly from bytes using rioxarray
+    da = rxr.open_rasterio(BytesIO(response.content), masked=True)
+    
+    # rioxarray returns a DataArray with band dimension - squeeze it out if single band
+    if 'band' in da.dims and len(da.band) == 1:
+        da = da.squeeze('band', drop=True)
+    
+    # Rename coordinates to match your existing code structure
+    # rioxarray uses 'x' and 'y', you might need 'lon' and 'lat'
+    if 'x' in da.coords and 'y' in da.coords:
+        # Get the lat/lon values from the georeferenced coordinates
+        lats = da.y.values
+        lons = da.x.values
         
-        # Get coordinates from first dataset
-        lats = snowfall_data_list[0]['latitude'].values
-        lons = snowfall_data_list[0]['longitude'].values
+        # Create a proper coordinate structure
+        da = da.rename({'y': 'lat', 'x': 'lon'})
         
-        # Create DataArray
-        da = xr.DataArray(
-            snow_accum.values,
-            coords={"lat": (["y", "x"], lats), "lon": (["y", "x"], lons)},
-            dims=["y", "x"]
-        )
-        
-        accum_end = '6am'
-        print("Successfully retrieved and processed NBM data from AWS S3")
-    else:
-        raise Exception("No data was successfully downloaded")
-        
+        # Note: The data values are in meters, convert to inches if needed
+        # NBM typically provides snowfall in meters
+        da = da * 39.3701  # Convert meters to inches
+    
+    accum_end = '6am'
+    print("Successfully retrieved NBM GeoTIFF data from AWS S3")
+    print(f"Data shape: {da.shape}")
+    print(f"Data range: {da.min().values:.2f} to {da.max().values:.2f} inches")
+    
 except Exception as e:
-    print(f"Error retrieving NBM data from AWS S3: {type(e).__name__}: {e}")
+    print(f"Error retrieving NBM GeoTIFF data: {type(e).__name__}: {e}")
     print("Continuing with NOHRSC data only...")
     da = None
     accum_end = '12am'
