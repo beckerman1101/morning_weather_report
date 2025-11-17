@@ -373,139 +373,55 @@ else:
 if da is not None:
     nbm = da
 # Extract 2D coordinates from nbm
-    nbm_lat = nbm['lat'].values  # Shape: (y, x)
-    nbm_lon = nbm['lon'].values  # Shape: (y, x)
-
-    from pyproj import Transformer
-
-# NBM Lambert Conformal Conic -> WGS84
-    transformer = Transformer.from_crs("EPSG:6362", "EPSG:4326", always_xy=True)
-
-    proj_x = nbm_lon  # these are actually X coordinates in meters
-    proj_y = nbm_lat  # these are actually Y coordinates in meters
-
-# Convert to lon/lat
-    nbm_lon_deg, nbm_lat_deg = transformer.transform(proj_x, proj_y)
-
-    nbm_lat = nbm_lat_deg
-    nbm_lon = nbm_lon_deg
-    print(nbm_lat[0:5])
-# Extract coordinates and data from nohrsc
-    nohrsc_lat = nohrsc['lat'].values  # Shape: (lat,)
-    nohrsc_lon = nohrsc['lon'].values  # Shape: (lon,)
-    nohrsc_data = nohrsc['Data'].values  # Shape: (lat, lon)
-
-# Create a grid for nohrsc's coordinates
-    nohrsc_lat_grid, nohrsc_lon_grid = np.meshgrid(nohrsc_lat, nohrsc_lon, indexing='ij')  # Shape: (lat, lon)
-
-# Flatten the nohrsc grid and data
-    nohrsc_points = np.column_stack((nohrsc_lat_grid.ravel(), nohrsc_lon_grid.ravel()))  # Shape: (lat*lon, 2)
-    nohrsc_values = nohrsc_data.ravel()  # Shape: (lat*lon,)
-    
-# Interpolate nohrsc onto nbm's grid
-    nohrsc_regridded = griddata(
-        nohrsc_points,  # Source points (flattened lat/lon)
-        nohrsc_values,  # Source data (flattened)
-        (nbm_lat, nbm_lon),  # Target grid (nbm's 2D lat/lon)
-        method='linear',  # Interpolation method
-        fill_value=np.nan  # Fill missing values with NaN
-    )
-
-# Convert back to xarray DataArray
-    nohrsc_regridded = xr.DataArray(
-        nohrsc_regridded,
-        dims=["y", "x"],
-        coords={"lat": (["y", "x"], nbm_lat), "lon": (["y", "x"], nbm_lon)}
-    )
-
-# Ensure the units are consistent (both in inches)
-    nohrsc_inches = nohrsc_regridded * 39.3701
-    nbm_inches = nbm.copy()
-    print("\n--- DEBUG: GRID COMPATIBILITY CHECK ---")
-
-# 1. Shapes
-    print("NBM shape:", nbm_inches.shape)
-    print("NOHRSC regridded shape:", nohrsc_inches.shape)
-
-# 2. Coordinate extents
-    print("\nNBM Latitude range:", float(np.nanmin(nbm_lat)), "to", float(np.nanmax(nbm_lat)))
-    print("NBM Longitude range:", float(np.nanmin(nbm_lon)), "to", float(np.nanmax(nbm_lon)))
-
-    print("NOHRSC regridded Latitude range:", float(np.nanmin(nohrsc_regridded.lat)), 
-          "to", float(np.nanmax(nohrsc_regridded.lat)))
-    print("NOHRSC regridded Longitude range:", float(np.nanmin(nohrsc_regridded.lon)), 
-          "to", float(np.nanmax(nohrsc_regridded.lon)))
-
-# 3. Check for NaNs
-    print("\nNaN counts:")
-    print("NBM:", np.isnan(nbm_inches.values).sum())
-    print("NOHRSC regridded:", np.isnan(nohrsc_inches.values).sum())
-
-# 4. Check if grids align point-by-point
-    lat_equal = np.allclose(nbm_lat, nohrsc_regridded.lat.values, atol=1e-6, equal_nan=True)
-    lon_equal = np.allclose(nbm_lon, nohrsc_regridded.lon.values, atol=1e-6, equal_nan=True)
-
-    print("\nDo NBM & NOHRSC lat grids match? ", lat_equal)
-    print("Do NBM & NOHRSC lon grids match? ", lon_equal)
-
-# 5. Quick center-point comparison
-    mid_y = nbm_lat.shape[0] // 2
-    mid_x = nbm_lat.shape[1] // 2
-
-    print("\nSample point check:")
-    print("NBM center lat/lon:", nbm_lat[mid_y, mid_x], nbm_lon[mid_y, mid_x])
-    print("NOHRSC center lat/lon:", 
-          nohrsc_regridded.lat.values[mid_y, mid_x], 
-          nohrsc_regridded.lon.values[mid_y, mid_x])
-
-# 6. Units check — should be inches
-    print("\nUnit check:")
-    print("NBM inches min/max:", float(np.nanmin(nbm_inches)), float(np.nanmax(nbm_inches)))
-    print("NOHRSC inches min/max:", float(np.nanmin(nohrsc_inches)), float(np.nanmax(nohrsc_inches)))
-
-    print(type(nbm_inches))
-    print(type(nohrsc_inches))
-
-    print("\n--- DATAARRAY INTEGRITY ---")
-    print("NBM type:", type(nbm_inches))
-    print("NOHRSC type:", type(nohrsc_inches))
-
-    print("NBM dtype:", nbm_inches.dtype)
-    print("NOHRSC dtype:", nohrsc_inches.dtype)
-
-    print("NBM values type:", type(nbm_inches.values))
-    print("NOHRSC values type:", type(nohrsc_inches.values))
-
-    print("NBM coords:", nbm_inches.coords)
-    print("NOHRSC coords:", nohrsc_inches.coords)
-
-    print("NBM dims:", nbm_inches.dims)
-    print("NOHRSC dims:", nohrsc_inches.dims)
-
-    print("NBM attrs:", nbm_inches.attrs)
-    print("NOHRSC attrs:", nohrsc_inches.attrs)
-
-# Sum the datasets
-    total_snowfall = xr.DataArray(
-        nbm_inches.values + nohrsc_inches.values,
-        dims=nbm_inches.dims,          # ('y', 'x')
-        coords=nbm_inches.coords,      # Preserve lat/lon meshgrid
-        attrs={"units": "inches"}
-    )
 
 
-    print("--- DEBUG: TOTAL_SNOWFALL CHECK ---")
-    print(f"Type: {type(total_snowfall)}")
-    print(f"Dims: {total_snowfall.dims}")
-    print(f"Shape: {total_snowfall.shape}")
-    print(f"Coordinates: {list(total_snowfall.coords.keys())}")
-    for c in total_snowfall.coords:
-        print(f"  {c} shape: {total_snowfall.coords[c].shape} dtype: {total_snowfall.coords[c].dtype}")
-    print(f"Data type: {total_snowfall.dtype}")
-    print(f"Min / Max / NaNs: {total_snowfall.min().values} / {total_snowfall.max().values} / {np.isnan(total_snowfall.values).sum()}")
-    print(f"Sample center point: {total_snowfall.values[total_snowfall.shape[0]//2, total_snowfall.shape[1]//2]}")
+# --- DEBUG HELPER ---
+    def debug_da(da, name="DataArray"):
+        print(f"--- {name} DEBUG ---")
+        print(f"Type: {type(da)}")
+        print(f"Dims: {da.dims}")
+        print(f"Shape: {da.shape}")
+        print(f"Coords: {list(da.coords)}")
+        for coord in da.coords:
+            print(f"{coord} range: {da[coord].min().values} -> {da[coord].max().values}")
+        print(f"Data type: {da.dtype}")
+        print(f"Min / Max / NaNs: {np.nanmin(da.values)}, {np.nanmax(da.values)}, {np.isnan(da.values).sum()}")
+        print("--- END DEBUG ---\n")
 
+# --- INPUTS ---
+# nbm = your NBM DataArray (values in meters, coords 'lat', 'lon' in projected meters)
+# nohrsc_inches = your regridded NOHRSC DataArray (values in inches, coords 'lat', 'lon' in degrees)
+# co_bounds = [min_lon, max_lon, min_lat, max_lat]
 
+# Step 1: Convert NBM coordinates from meters → degrees
+    proj_nbm = pyproj.CRS("EPSG:5070")  # CONUS Albers projection (assumed)
+    proj_deg = pyproj.CRS("EPSG:4326")  # WGS84 lat/lon
+    transformer = pyproj.Transformer.from_crs(proj_nbm, proj_deg, always_xy=True)
+
+    x_flat = nbm['lon'].values.ravel()
+    y_flat = nbm['lat'].values.ravel()
+    lon_deg, lat_deg = transformer.transform(x_flat, y_flat)
+
+# Reshape back to original grid
+    nbm_lat_deg = lat_deg.reshape(nbm['lat'].shape)
+    nbm_lon_deg = lon_deg.reshape(nbm['lon'].shape)
+
+# Assign new coordinates
+    nbm = nbm.assign_coords(lat=(('y', 'x'), nbm_lat_deg),
+                            lon=(('y', 'x'), nbm_lon_deg))
+
+# Step 2: Convert units to inches if needed
+    nbm_inches = nbm.copy() # meters → inches
+# nohrsc_inches assumed already in inches
+
+    debug_da(nbm_inches, "NBM Inches")
+    debug_da(nohrsc_inches, "NOHRSC Regridded Inches")
+
+# Step 3: Sum datasets safely
+    total_snowfall = nbm_inches + nohrsc_inches
+    debug_da(total_snowfall, "Total Snowfall")
+
+# Step 4: Subset for Colorado bounds
     df_co = total_snowfall.where(
         (total_snowfall.lat >= co_bounds[2]) &
         (total_snowfall.lat <= co_bounds[3]) &
@@ -514,37 +430,30 @@ if da is not None:
         drop=True
     )
 
+    debug_da(df_co, "Colorado Subset")
 
-# Get the number of latitude and longitude points in the filtered data
+# Step 5: Prepare interpolation grid (optional)
     latlen = len(df_co.lat)
     lonlen = len(df_co.lon)
-
-# Define the interpolation factor
     inter_factor = 10
-
-# Create target latitude and longitude arrays
     target_lat = np.linspace(co_bounds[2], co_bounds[3], latlen * inter_factor)
     target_lon = np.linspace(co_bounds[0], co_bounds[1], lonlen * inter_factor)
 
-# Flatten the original coordinates and data
-    points = np.column_stack((df_co.lat.values.ravel(), df_co.lon.values.ravel()))  # Shape: (y*x, 2)
-    values = df_co.values.ravel()  # Shape: (y*x,)
+# Flatten for griddata interpolation
+    points = np.column_stack((df_co.lat.values.ravel(), df_co.lon.values.ravel()))
+    values = df_co.values.ravel()
 
-# Create a grid for the target coordinates
-    target_lat_grid, target_lon_grid = np.meshgrid(target_lat, target_lon, indexing='ij')  # Shape: (lat, lon)
-    print("df_co shape:", df_co.shape)
-    print("lat range:", float(df_co.lat.min()), float(df_co.lat.max()))
-    print("lon range:", float(df_co.lon.min()), float(df_co.lon.max()))
-    print("co bounds:", co_bounds)
-    print("Number of points:", df_co.lat.size * df_co.lon.size)
+# Create target mesh
+    target_lat_grid, target_lon_grid = np.meshgrid(target_lat, target_lon, indexing='ij')
 
-# Interpolate onto the target grid
+# Interpolate onto target grid
+    from scipy.interpolate import griddata
     snow_accumulation = griddata(
-        points,  # Source points (flattened lat/lon)
-        values,  # Source data (flattened)
-        (target_lat_grid, target_lon_grid),  # Target grid
-        method='linear',  # Interpolation method
-        fill_value=np.nan  # Fill missing values with NaN
+        points,
+        values,
+        (target_lat_grid, target_lon_grid),
+        method='linear',
+        fill_value=np.nan
     )
 
 # Convert back to xarray DataArray
@@ -553,6 +462,9 @@ if da is not None:
         dims=["lat", "lon"],
         coords={"lat": target_lat, "lon": target_lon}
     )
+
+    debug_da(snow_accumulation, "Interpolated Snowfall")
+
 else:
     df2 = snow_accum_nohrsc
     df_co = df2.where(df2.lat>=co_bounds[2], drop=True).where(df2.lat<=co_bounds[3], drop=True).where(df2.lon>=co_bounds[0], drop=True).where(df2.lon<=co_bounds[1], drop=True)
