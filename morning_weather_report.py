@@ -375,7 +375,8 @@ if da is not None:
 # Extract 2D coordinates from nbm
     nbm_lat = nbm['lat'].values  # Shape: (y, x)
     nbm_lon = nbm['lon'].values  # Shape: (y, x)
-
+    print(nbm_lat.head())
+    print(nbm_lon.head())
 # Extract coordinates and data from nohrsc
     nohrsc_lat = nohrsc['lat'].values  # Shape: (lat,)
     nohrsc_lon = nohrsc['lon'].values  # Shape: (lon,)
