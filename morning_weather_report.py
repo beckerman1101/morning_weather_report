@@ -413,7 +413,7 @@ if da is not None:
 
 # Step 2: Convert units to inches if needed
     nbm_inches = nbm.copy() # meters → inches
-# nohrsc_inches assumed already in inches
+    nohrsc_inches = nohrsc*39.3701
 
     debug_da(nbm_inches, "NBM Inches")
     debug_da(nohrsc_inches, "NOHRSC Regridded Inches")
