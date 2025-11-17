@@ -254,135 +254,73 @@ end_slice = pos+1
 snow_m = snow_fcst.isel(step=slice(0, end_slice)).unknown.sum(dim='step')
 end = snow_fcst.step[pos].valid_time.values.astype('datetime64[s]').astype(datetime).replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/Denver")).strftime('%I%p %a')
 
-da = None
-edexServer = "edex-cloud.unidata.ucar.edu"
-DataAccessLayer.changeEDEXHost(edexServer)
-grid_request = DataAccessLayer.newDataRequest()
-grid_request.setDatatype("grid")
-grid_request.setLocationNames("NationalBlend")
-grid_request.setParameters("TOTSN1hr")
-grid_cycles = DataAccessLayer.getAvailableTimes(grid_request, True)
-grid_times = DataAccessLayer.getAvailableTimes(grid_request)
-grid_06z = None
-for cycle in grid_cycles:
-    ref_time = cycle.getRefTime()
-    ref_time_str = str(ref_time)
-    ref_time_datetime = datetime.strptime(ref_time_str, "%Y-%m-%d %H:%M:%S.%f")
-    if ref_time_datetime.hour == 6:
-        grid_06z = cycle
-        break
-if grid_06z is not None:
-    grid_fcstRun = DataAccessLayer.getForecastRun(grid_06z, grid_times)
-    print(f"Successfully selected 06Z run: {grid_06z}")
-    accum_end = '6am'
-    first_six_times = grid_fcstRun[:6]  # Get first six timesteps
+# Replace the entire python-awips section (lines starting with "da = None" through "else:")
 
-# Step 5: Request grid data for selected timesteps
-    nbm_response = DataAccessLayer.getGridData(grid_request, first_six_times)
+import rasterio
+from pyproj import Transformer
 
-    snowfall_data_list = []
+# Construct NBM GeoTIFF URL for 06Z run
+nbm_url = f"https://noaa-nbm-pds.s3.amazonaws.com/blendv4.3/conus/{today.year}/{today.strftime('%m')}/{today.strftime('%d')}/0600/snowamt06/blendv4.3_conus_snowamt06_{today.strftime('%Y-%m-%d')}T06%3A00_{today.strftime('%Y-%m-%d')}T12%3A00.tif"
 
-    for grid in nbm_response:
-        snowfall_data = np.array(grid.getRawData())
-    # Get lat/lon coordinates directly from the grid
-        lats, lons = grid.getLatLonCoords()
-
-    # Since the data is rotated, we need to swap the lats and lons
-        lats, lons = lons, lats  # Swap latitude and longitude values
-    # Append the snowfall data
-        snowfall_data_list.append(snowfall_data)
-
-# Step 7: Combine and sum over the first six timesteps
-    if snowfall_data_list:
-        snow_accum = np.sum(snowfall_data_list, axis=0)  # Sum over time dimension (axis 0)
-
-    # Create the final xarray DataArray with explicit dimension names
-        da = xr.DataArray(
-            snow_accum,
-            coords={"lat": (["y", "x"], lats), "lon": (["y", "x"], lons)},  # Use different dimension names
-            dims=["y", "x"]
-        )
-        print("Successfully summed first six timesteps of NAM snowfall.")
-    else:
-        print("No data available.")
-
-else:
-    print("No 06Z cycle found in the available grid cycles.")
-    accum_end = '12am'
-
-# List of timestamps to download
-ts_list = [yesterdaystr + '12', yesterdaystr + '18', todaystr + '00', todaystr + '06']
-
-# Download and process NOHRSC data
-datasets = []
-for timestamp in ts_list:
-    accum_url = f"https://www.nohrsc.noaa.gov/snowfall_v2/data/{mo}/sfav2_CONUS_6h_{timestamp}.nc"
-    accum_name = f'{timestamp}_gridded.nc'
-
-    response = requests.get(accum_url, stream=True)
-    if response.status_code == 200:
-        with open(accum_name, "wb") as file:
-            for chunk in response.iter_content(chunk_size=8192):
-                file.write(chunk)
-        print(f"Downloaded: {accum_name}")
-
-        # Open the dataset
-        ds = xr.open_dataset(accum_name)
-        datasets.append(ds)
-    else:
-        print(f"Failed to download: {accum_url}")
-
-# Combine datasets and sum over time
-if datasets:
-    snow_accum_nohrsc = xr.concat(datasets, dim="time").sum(dim="time")
-    print("Successfully combined and summed NOHRSC snowfall datasets")
-    nohrsc = snow_accum_nohrsc
-else:
-    print("No files were successfully downloaded.")
-
-
-if da is not None:
-    nbm = da
-# Extract 2D coordinates from nbm
-    nbm_lat = nbm['lat'].values  # Shape: (y, x)
-    nbm_lon = nbm['lon'].values  # Shape: (y, x)
-
-# Extract coordinates and data from nohrsc
-    nohrsc_lat = nohrsc['lat'].values  # Shape: (lat,)
-    nohrsc_lon = nohrsc['lon'].values  # Shape: (lon,)
-    nohrsc_data = nohrsc['Data'].values  # Shape: (lat, lon)
-
-# Create a grid for nohrsc's coordinates
-    nohrsc_lat_grid, nohrsc_lon_grid = np.meshgrid(nohrsc_lat, nohrsc_lon, indexing='ij')  # Shape: (lat, lon)
-
-# Flatten the nohrsc grid and data
-    nohrsc_points = np.column_stack((nohrsc_lat_grid.ravel(), nohrsc_lon_grid.ravel()))  # Shape: (lat*lon, 2)
-    nohrsc_values = nohrsc_data.ravel()  # Shape: (lat*lon,)
-
-# Interpolate nohrsc onto nbm's grid
-    nohrsc_regridded = griddata(
-        nohrsc_points,  # Source points (flattened lat/lon)
-        nohrsc_values,  # Source data (flattened)
-        (nbm_lat, nbm_lon),  # Target grid (nbm's 2D lat/lon)
-        method='linear',  # Interpolation method
-        fill_value=np.nan  # Fill missing values with NaN
+try:
+    # Open NBM GeoTIFF
+    with rasterio.open(nbm_url) as src:
+        nbm_data = src.read(1)
+        transform = src.transform
+        crs = src.crs
+        h, w = src.height, src.width
+        
+        # Build 2D grids of x/y coordinates in the native projection
+        cols, rows = np.meshgrid(np.arange(w), np.arange(h))
+        xs, ys = rasterio.transform.xy(transform, rows.flatten(), cols.flatten(), offset="center")
+        xs = np.array(xs).reshape(h, w)
+        ys = np.array(ys).reshape(h, w)
+        
+        # Transform to lat/lon (EPSG:4326)
+        transformer = Transformer.from_crs(crs, "EPSG:4326", always_xy=True)
+        nbm_lons, nbm_lats = transformer.transform(xs, ys)
+    
+    # Extract the 1D lat/lon from NOHRSC (from nohrsc variable created earlier)
+    target_lat = nohrsc['lat'].values
+    target_lon = nohrsc['lon'].values
+    
+    # Create 2D meshgrid for target coordinates
+    target_lon_2d, target_lat_2d = np.meshgrid(target_lon, target_lat)
+    
+    # Flatten the NBM source data for interpolation
+    source_points = np.column_stack([nbm_lons.flatten(), nbm_lats.flatten()])
+    source_values = nbm_data.flatten()
+    
+    # Remove any NaN values
+    valid_mask = ~np.isnan(source_values)
+    source_points = source_points[valid_mask]
+    source_values = source_values[valid_mask]
+    
+    # Interpolate NBM data onto NOHRSC grid
+    print("Regridding NBM data to NOHRSC grid... this may take a moment")
+    nbm_regridded = griddata(
+        source_points,
+        source_values,
+        (target_lon_2d, target_lat_2d),
+        method='linear',
+        fill_value=np.nan
     )
-
-# Convert back to xarray DataArray
-    nohrsc_regridded = xr.DataArray(
-        nohrsc_regridded,
-        dims=["y", "x"],
-        coords={"lat": (["y", "x"], nbm_lat), "lon": (["y", "x"], nbm_lon)}
+    
+    # Create xarray DataArray for regridded NBM
+    nbm_regridded_xr = xr.DataArray(
+        nbm_regridded,
+        dims=["lat", "lon"],
+        coords={"lat": target_lat, "lon": target_lon}
     )
-
-# Ensure the units are consistent (both in inches)
-    nbm_inches = nbm * 39.3701
-    nohrsc_inches = nohrsc_regridded * 39.3701
-
-# Sum the datasets
+    
+    # Convert to inches and sum with NOHRSC data
+    nbm_inches = nbm_regridded_xr * 39.3701  # Convert meters to inches
+    nohrsc_inches = nohrsc['Data'] * 39.3701  # Convert meters to inches
+    
+    # Sum the datasets
     total_snowfall = nbm_inches + nohrsc_inches
-
-
+    
+    # Filter to Colorado bounds and interpolate
     df_co = total_snowfall.where(
         (total_snowfall.lat >= co_bounds[2]) &
         (total_snowfall.lat <= co_bounds[3]) &
@@ -390,42 +328,29 @@ if da is not None:
         (total_snowfall.lon <= co_bounds[1]),
         drop=True
     )
-
-# Get the number of latitude and longitude points in the filtered data
+    
+    # Get the number of latitude and longitude points in the filtered data
     latlen = len(df_co.lat)
     lonlen = len(df_co.lon)
-
-# Define the interpolation factor
+    
+    # Define the interpolation factor
     inter_factor = 10
+    
+    # Create target latitude and longitude arrays
+    target_lat_interp = np.linspace(co_bounds[2], co_bounds[3], latlen * inter_factor)
+    target_lon_interp = np.linspace(co_bounds[0], co_bounds[1], lonlen * inter_factor)
+    
+    # Interpolate onto finer grid
+    snow_accumulation = df_co.interp(lat=target_lat_interp, lon=target_lon_interp, method='linear')
+    
+    accum_end = '6am'
+    print("Successfully processed NBM GeoTIFF and combined with NOHRSC data")
 
-# Create target latitude and longitude arrays
-    target_lat = np.linspace(co_bounds[2], co_bounds[3], latlen * inter_factor)
-    target_lon = np.linspace(co_bounds[0], co_bounds[1], lonlen * inter_factor)
-
-# Flatten the original coordinates and data
-    points = np.column_stack((df_co.lat.values.ravel(), df_co.lon.values.ravel()))  # Shape: (y*x, 2)
-    values = df_co.values.ravel()  # Shape: (y*x,)
-
-# Create a grid for the target coordinates
-    target_lat_grid, target_lon_grid = np.meshgrid(target_lat, target_lon, indexing='ij')  # Shape: (lat, lon)
-
-# Interpolate onto the target grid
-    snow_accumulation = griddata(
-        points,  # Source points (flattened lat/lon)
-        values,  # Source data (flattened)
-        (target_lat_grid, target_lon_grid),  # Target grid
-        method='linear',  # Interpolation method
-        fill_value=np.nan  # Fill missing values with NaN
-    )
-
-# Convert back to xarray DataArray
-    snow_accumulation = xr.DataArray(
-        snow_accumulation,
-        dims=["lat", "lon"],
-        coords={"lat": target_lat, "lon": target_lon}
-    )
-else:
-    df2 = snow_accum_nohrsc
+except Exception as e:
+    print(f"Error processing NBM GeoTIFF: {e}")
+    print("Falling back to NOHRSC data only")
+    # Fallback to NOHRSC only
+    df2 = nohrsc
     df_co = df2.where(df2.lat>=co_bounds[2], drop=True).where(df2.lat<=co_bounds[3], drop=True).where(df2.lon>=co_bounds[0], drop=True).where(df2.lon<=co_bounds[1], drop=True)
     latlen = len(df_co.lat)
     lonlen = len(df_co.lon)
@@ -433,6 +358,7 @@ else:
     target_lat = np.linspace(co_bounds[2], co_bounds[3], latlen*inter_factor)
     target_lon = np.linspace(co_bounds[0], co_bounds[1], lonlen*inter_factor)
     snow_accumulation = 39.3701 * df_co['Data'].interp(lat=target_lat, lon=target_lon, method='linear')
+    accum_end = '12am'
 
 
 df1 = 39.3701*snow_m
@@ -670,7 +596,7 @@ SENDER_EMAIL = "beckerman1101@gmail.com"
 SENDER_PASSWORD = os.getenv('GMAIL_PW')
 
 # Recipient email
-RECIPIENT_EMAILS = ["brendan.eckerman@state.co.us", "michael.chapman@state.co.us", "nicholas.barlow@state.co.us","bob.fifer@state.co.us","shawn.smith@state.co.us","james.fox@state.co.us"]
+RECIPIENT_EMAILS = ["brendan.eckerman@state.co.us"]#, "michael.chapman@state.co.us", "nicholas.barlow@state.co.us","bob.fifer@state.co.us","shawn.smith@state.co.us","james.fox@state.co.us"]
 
 # Email Subject & Body
 SUBJECT = f"Morning Weather Report - {todayst}"
