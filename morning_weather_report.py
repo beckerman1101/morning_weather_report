@@ -284,17 +284,12 @@ try:
     print("Attempting to retrieve NBM data from AWS S3 (GeoTIFF)...")
     
     # Determine which date to use
-    # If it's before 6 AM UTC, use yesterday's data
     if now_utc.hour < 6:
         cycle_date = (now_utc - timedelta(days=1)).strftime('%Y/%m/%d')
     else:
         cycle_date = now_utc.strftime('%Y/%m/%d')
     
-    # Build the URL for the 6-hour accumulation ending at 12Z (6am MST)
-    # Format: blendv4.3_conus_snowamt06_YYYY-MM-DDTHH:MM_YYYY-MM-DDTHH:MM.tif
     base_url = "https://noaa-nbm-pds.s3.amazonaws.com"
-    
-    # The file you referenced is for 06Z to 12Z (6 hours)
     start_time = f"{cycle_date.replace('/', '-')}T06:00"
     end_time = f"{cycle_date.replace('/', '-')}T12:00"
     
@@ -307,25 +302,32 @@ try:
     response.raise_for_status()
     
     # Read directly from bytes using rioxarray
-    da = rxr.open_rasterio(BytesIO(response.content), masked=True)
+    da_raw = rxr.open_rasterio(BytesIO(response.content), masked=True)
     
-    # rioxarray returns a DataArray with band dimension - squeeze it out if single band
-    if 'band' in da.dims and len(da.band) == 1:
-        da = da.squeeze('band', drop=True)
+    # Squeeze out band dimension if single band
+    if 'band' in da_raw.dims and len(da_raw.band) == 1:
+        da_raw = da_raw.squeeze('band', drop=True)
     
-    # Rename coordinates to match your existing code structure
-    # rioxarray uses 'x' and 'y', you might need 'lon' and 'lat'
-    if 'x' in da.coords and 'y' in da.coords:
-        # Get the lat/lon values from the georeferenced coordinates
-        lats = da.y.values
-        lons = da.x.values
-        
-        # Create a proper coordinate structure
-        da = da.rename({'y': 'lat', 'x': 'lon'})
-        
-        # Note: The data values are in meters, convert to inches if needed
-        # NBM typically provides snowfall in meters
-        da = da * 39.3701  # Convert meters to inches
+    # Convert meters to inches
+    da_raw = da_raw * 39.3701
+    
+    # Create 2D coordinate grids (meshgrid) for compatibility with your existing code
+    # The GeoTIFF has 1D coordinates (y, x), we need to create 2D grids (lat, lon)
+    lats_1d = da_raw.y.values
+    lons_1d = da_raw.x.values
+    
+    # Create meshgrid - this creates 2D arrays from 1D arrays
+    lons_2d, lats_2d = np.meshgrid(lons_1d, lats_1d)
+    
+    # Create DataArray with 2D coordinate arrays (matching your existing structure)
+    da = xr.DataArray(
+        da_raw.values,
+        coords={
+            "lat": (["y", "x"], lats_2d),
+            "lon": (["y", "x"], lons_2d)
+        },
+        dims=["y", "x"]
+    )
     
     accum_end = '6am'
     print("Successfully retrieved NBM GeoTIFF data from AWS S3")
