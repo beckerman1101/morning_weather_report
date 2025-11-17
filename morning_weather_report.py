@@ -486,7 +486,13 @@ if da is not None:
     print("NOHRSC attrs:", nohrsc_inches.attrs)
 
 # Sum the datasets
-    total_snowfall = nbm_inches + nohrsc_inches
+    total_snowfall = xr.DataArray(
+        nbm_inches.values + nohrsc_inches.values,
+        dims=nbm_inches.dims,          # ('y', 'x')
+        coords=nbm_inches.coords,      # Preserve lat/lon meshgrid
+        attrs={"units": "inches"}
+    )
+
 
     print("--- DEBUG: TOTAL_SNOWFALL CHECK ---")
     print(f"Type: {type(total_snowfall)}")
