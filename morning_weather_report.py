@@ -463,6 +463,8 @@ if da is not None:
     print("NBM inches min/max:", float(np.nanmin(nbm_inches)), float(np.nanmax(nbm_inches)))
     print("NOHRSC inches min/max:", float(np.nanmin(nohrsc_inches)), float(np.nanmax(nohrsc_inches)))
 
+    print(type(nbm_inches))
+    print(type(nohrsc_inches))
 # Sum the datasets
     total_snowfall = nbm_inches + nohrsc_inches
 
