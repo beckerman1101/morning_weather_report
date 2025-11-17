@@ -488,13 +488,23 @@ if da is not None:
 # Sum the datasets
     total_snowfall = nbm_inches + nohrsc_inches
 
-    
+    print("--- DEBUG: TOTAL_SNOWFALL CHECK ---")
+    print(f"Type: {type(total_snowfall)}")
+    print(f"Dims: {total_snowfall.dims}")
+    print(f"Shape: {total_snowfall.shape}")
+    print(f"Coordinates: {list(total_snowfall.coords.keys())}")
+    for c in total_snowfall.coords:
+        print(f"  {c} shape: {total_snowfall.coords[c].shape} dtype: {total_snowfall.coords[c].dtype}")
+    print(f"Data type: {total_snowfall.dtype}")
+    print(f"Min / Max / NaNs: {total_snowfall.min().values} / {total_snowfall.max().values} / {np.isnan(total_snowfall.values).sum()}")
+    print(f"Sample center point: {total_snowfall.values[total_snowfall.shape[0]//2, total_snowfall.shape[1]//2]}")
+
 
     df_co = total_snowfall.where(
-        (total_snowfall.coords['lat'] >= co_bounds[2]) &
-        (total_snowfall.coords['lat'] <= co_bounds[3]) &
-        (total_snowfall.coords['lon'] >= co_bounds[0]) &
-        (total_snowfall.coords['lon'] <= co_bounds[1]),
+        (total_snowfall.lat >= co_bounds[2]) &
+        (total_snowfall.lat <= co_bounds[3]) &
+        (total_snowfall.lon >= co_bounds[0]) &
+        (total_snowfall.lon <= co_bounds[1]),
         drop=True
     )
 
