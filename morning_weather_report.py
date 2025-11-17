@@ -309,7 +309,6 @@ try:
         da_raw = da_raw.squeeze('band', drop=True)
     
     # Convert meters to inches
-    da_raw = da_raw * 39.3701
     
     # Create 2D coordinate grids (meshgrid) for compatibility with your existing code
     # The GeoTIFF has 1D coordinates (y, x), we need to create 2D grids (lat, lon)
@@ -388,7 +387,7 @@ if da is not None:
 # Flatten the nohrsc grid and data
     nohrsc_points = np.column_stack((nohrsc_lat_grid.ravel(), nohrsc_lon_grid.ravel()))  # Shape: (lat*lon, 2)
     nohrsc_values = nohrsc_data.ravel()  # Shape: (lat*lon,)
-
+    
 # Interpolate nohrsc onto nbm's grid
     nohrsc_regridded = griddata(
         nohrsc_points,  # Source points (flattened lat/lon)
@@ -438,6 +437,11 @@ if da is not None:
 
 # Create a grid for the target coordinates
     target_lat_grid, target_lon_grid = np.meshgrid(target_lat, target_lon, indexing='ij')  # Shape: (lat, lon)
+    print("df_co shape:", df_co.shape)
+    print("lat range:", float(df_co.lat.min()), float(df_co.lat.max()))
+    print("lon range:", float(df_co.lon.min()), float(df_co.lon.max()))
+    print("co bounds:", co_bounds)
+    print("Number of points:", df_co.lat.size * df_co.lon.size)
 
 # Interpolate onto the target grid
     snow_accumulation = griddata(
