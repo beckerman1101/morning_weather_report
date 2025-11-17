@@ -491,12 +491,13 @@ if da is not None:
     
 
     df_co = total_snowfall.where(
-        (total_snowfall.lat >= co_bounds[2]) &
-        (total_snowfall.lat <= co_bounds[3]) &
-        (total_snowfall.lon >= co_bounds[0]) &
-        (total_snowfall.lon <= co_bounds[1]),
+        (total_snowfall.coords['lat'] >= co_bounds[2]) &
+        (total_snowfall.coords['lat'] <= co_bounds[3]) &
+        (total_snowfall.coords['lon'] >= co_bounds[0]) &
+        (total_snowfall.coords['lon'] <= co_bounds[1]),
         drop=True
     )
+
 
 # Get the number of latitude and longitude points in the filtered data
     latlen = len(df_co.lat)
