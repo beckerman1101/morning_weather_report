@@ -254,77 +254,90 @@ end_slice = pos+1
 snow_m = snow_fcst.isel(step=slice(0, end_slice)).unknown.sum(dim='step')
 end = snow_fcst.step[pos].valid_time.values.astype('datetime64[s]').astype(datetime).replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/Denver")).strftime('%I%p %a')
 
+import xarray as xr
+import requests
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+import os
+
+# Get today's date
+today = datetime.now(ZoneInfo('America/Denver'))
+date_str = today.strftime('%Y%m%d')
+
+# Try to get the 06Z cycle NBM data
 da = None
 accum_end = '12am'
 
 try:
-    # Try production server instead of beta
-    edexServer = "edex-cloud.unidata.ucar.edu"
-    DataAccessLayer.changeEDEXHost(edexServer)
+    print("Attempting to retrieve NBM data from AWS S3...")
     
-    grid_request = DataAccessLayer.newDataRequest()
-    grid_request.setDatatype("grid")
-    grid_request.setLocationNames("NationalBlend")
-    grid_request.setParameters("TOTSN1hr")
+    # NBM runs at 00Z, 06Z, 12Z, 18Z
+    # We want the most recent 06Z run
+    base_url = "https://noaa-nbm-grib2-pds.s3.amazonaws.com"
     
-    print("Attempting to retrieve NBM data from AWIPS...")
-    grid_cycles = DataAccessLayer.getAvailableTimes(grid_request, True)
-    
-    if not grid_cycles:
-        raise ValueError("No grid cycles available")
-        
-    grid_times = DataAccessLayer.getAvailableTimes(grid_request)
-    
-    grid_06z = None
-    for cycle in grid_cycles:
-        ref_time = cycle.getRefTime()
-        ref_time_str = str(ref_time)
-        ref_time_datetime = datetime.strptime(ref_time_str, "%Y-%m-%d %H:%M:%S.%f")
-        if ref_time_datetime.hour == 6:
-            grid_06z = cycle
-            break
-    
-    if grid_06z is not None:
-        grid_fcstRun = DataAccessLayer.getForecastRun(grid_06z, grid_times)
-        print(f"Successfully selected 06Z run: {grid_06z}")
-        accum_end = '6am'
-        first_six_times = grid_fcstRun[:6]  # Get first six timesteps
-
-        # Step 5: Request grid data for selected timesteps
-        nbm_response = DataAccessLayer.getGridData(grid_request, first_six_times)
-
-        snowfall_data_list = []
-
-        for grid in nbm_response:
-            snowfall_data = np.array(grid.getRawData())
-            # Get lat/lon coordinates directly from the grid
-            lats, lons = grid.getLatLonCoords()
-
-            # Since the data is rotated, we need to swap the lats and lons
-            lats, lons = lons, lats  # Swap latitude and longitude values
-            # Append the snowfall data
-            snowfall_data_list.append(snowfall_data)
-
-        # Step 7: Combine and sum over the first six timesteps
-        if snowfall_data_list:
-            snow_accum = np.sum(snowfall_data_list, axis=0)  # Sum over time dimension (axis 0)
-
-            # Create the final xarray DataArray with explicit dimension names
-            da = xr.DataArray(
-                snow_accum,
-                coords={"lat": (["y", "x"], lats), "lon": (["y", "x"], lons)},  # Use different dimension names
-                dims=["y", "x"]
-            )
-            print("Successfully summed first six timesteps of NBM snowfall.")
-        else:
-            print("No data available.")
-            da = None
-
+    # Determine which 06Z cycle to use (today's or yesterday's)
+    now_utc = datetime.now(ZoneInfo('UTC'))
+    if now_utc.hour < 6:
+        # Use yesterday's 06Z
+        cycle_date = (now_utc - timedelta(days=1)).strftime('%Y%m%d')
     else:
-        print("No 06Z cycle found in the available grid cycles.")
+        # Use today's 06Z
+        cycle_date = now_utc.strftime('%Y%m%d')
+    
+    cycle = "06"
+    region = "co"  # CONUS
+    
+    # Download first 6 hourly forecasts (f001 through f006)
+    snowfall_data_list = []
+    
+    for hour in range(1, 7):
+        forecast_hour = f"{hour:03d}"
+        file_url = f"{base_url}/blend.{cycle_date}/{cycle}/core/blend.t{cycle}z.core.f{forecast_hour}.{region}.grib2"
+        
+        print(f"Downloading f{forecast_hour}...")
+        response = requests.get(file_url, timeout=30)
+        
+        if response.status_code == 200:
+            # Save temporarily
+            temp_file = f"nbm_f{forecast_hour}.grib2"
+            with open(temp_file, 'wb') as f:
+                f.write(response.content)
+            
+            # Open with xarray and extract snowfall
+            ds = xr.open_dataset(temp_file, engine='cfgrib', 
+                                filter_by_keys={'shortName': 'tsnowp'})  # Total snowfall
+            
+            snowfall_data_list.append(ds)
+            
+            # Clean up temp file
+            os.remove(temp_file)
+        else:
+            print(f"Failed to download f{forecast_hour}: Status {response.status_code}")
+            raise Exception(f"Download failed for forecast hour {forecast_hour}")
+    
+    # Combine and sum the datasets
+    if snowfall_data_list:
+        # Sum snowfall over all timesteps
+        snow_accum = sum([ds['tsnowp'] for ds in snowfall_data_list])
+        
+        # Get coordinates from first dataset
+        lats = snowfall_data_list[0]['latitude'].values
+        lons = snowfall_data_list[0]['longitude'].values
+        
+        # Create DataArray
+        da = xr.DataArray(
+            snow_accum.values,
+            coords={"lat": (["y", "x"], lats), "lon": (["y", "x"], lons)},
+            dims=["y", "x"]
+        )
+        
+        accum_end = '6am'
+        print("Successfully retrieved and processed NBM data from AWS S3")
+    else:
+        raise Exception("No data was successfully downloaded")
         
 except Exception as e:
-    print(f"Error retrieving NBM data: {type(e).__name__}: {e}")
+    print(f"Error retrieving NBM data from AWS S3: {type(e).__name__}: {e}")
     print("Continuing with NOHRSC data only...")
     da = None
     accum_end = '12am'
