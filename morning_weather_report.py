@@ -419,12 +419,54 @@ if da is not None:
     )
 
 # Ensure the units are consistent (both in inches)
-    nbm_inches = nbm * 39.3701
     nohrsc_inches = nohrsc_regridded * 39.3701
+    nbm_inches = nbm.copy()
+    print("\n--- DEBUG: GRID COMPATIBILITY CHECK ---")
+
+# 1. Shapes
+    print("NBM shape:", nbm_inches.shape)
+    print("NOHRSC regridded shape:", nohrsc_inches.shape)
+
+# 2. Coordinate extents
+    print("\nNBM Latitude range:", float(np.nanmin(nbm_lat)), "to", float(np.nanmax(nbm_lat)))
+    print("NBM Longitude range:", float(np.nanmin(nbm_lon)), "to", float(np.nanmax(nbm_lon)))
+
+    print("NOHRSC regridded Latitude range:", float(np.nanmin(nohrsc_regridded.lat)), 
+          "to", float(np.nanmax(nohrsc_regridded.lat)))
+    print("NOHRSC regridded Longitude range:", float(np.nanmin(nohrsc_regridded.lon)), 
+          "to", float(np.nanmax(nohrsc_regridded.lon)))
+
+# 3. Check for NaNs
+    print("\nNaN counts:")
+    print("NBM:", np.isnan(nbm_inches.values).sum())
+    print("NOHRSC regridded:", np.isnan(nohrsc_inches.values).sum())
+
+# 4. Check if grids align point-by-point
+    lat_equal = np.allclose(nbm_lat, nohrsc_regridded.lat.values, atol=1e-6, equal_nan=True)
+    lon_equal = np.allclose(nbm_lon, nohrsc_regridded.lon.values, atol=1e-6, equal_nan=True)
+
+    print("\nDo NBM & NOHRSC lat grids match? ", lat_equal)
+    print("Do NBM & NOHRSC lon grids match? ", lon_equal)
+
+# 5. Quick center-point comparison
+    mid_y = nbm_lat.shape[0] // 2
+    mid_x = nbm_lat.shape[1] // 2
+
+    print("\nSample point check:")
+    print("NBM center lat/lon:", nbm_lat[mid_y, mid_x], nbm_lon[mid_y, mid_x])
+    print("NOHRSC center lat/lon:", 
+          nohrsc_regridded.lat.values[mid_y, mid_x], 
+          nohrsc_regridded.lon.values[mid_y, mid_x])
+
+# 6. Units check — should be inches
+    print("\nUnit check:")
+    print("NBM inches min/max:", float(np.nanmin(nbm_inches)), float(np.nanmax(nbm_inches)))
+    print("NOHRSC inches min/max:", float(np.nanmin(nohrsc_inches)), float(np.nanmax(nohrsc_inches)))
 
 # Sum the datasets
-    total_snowfall = nbm_inches + nohrsc_inches
+    total_snowfall = nbm + nohrsc_inches
 
+    
 
     df_co = total_snowfall.where(
         (total_snowfall.lat >= co_bounds[2]) &
