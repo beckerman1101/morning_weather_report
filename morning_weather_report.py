@@ -465,6 +465,26 @@ if da is not None:
 
     print(type(nbm_inches))
     print(type(nohrsc_inches))
+
+    print("\n--- DATAARRAY INTEGRITY ---")
+    print("NBM type:", type(nbm_inches))
+    print("NOHRSC type:", type(nohrsc_inches))
+
+    print("NBM dtype:", nbm_inches.dtype)
+    print("NOHRSC dtype:", nohrsc_inches.dtype)
+
+    print("NBM values type:", type(nbm_inches.values))
+    print("NOHRSC values type:", type(nohrsc_inches.values))
+
+    print("NBM coords:", nbm_inches.coords)
+    print("NOHRSC coords:", nohrsc_inches.coords)
+
+    print("NBM dims:", nbm_inches.dims)
+    print("NOHRSC dims:", nohrsc_inches.dims)
+
+    print("NBM attrs:", nbm_inches.attrs)
+    print("NOHRSC attrs:", nohrsc_inches.attrs)
+
 # Sum the datasets
     total_snowfall = nbm_inches + nohrsc_inches
 
