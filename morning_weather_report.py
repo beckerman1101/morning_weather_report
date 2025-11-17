@@ -364,7 +364,7 @@ try:
     lonlen = len(df_co.lon)
     
     # Define the interpolation factor
-    inter_factor = 10
+    inter_factor = 8
     
     # Create target latitude and longitude arrays
     target_lat_interp = np.linspace(co_bounds[2], co_bounds[3], latlen * inter_factor)
