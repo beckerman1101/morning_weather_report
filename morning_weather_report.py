@@ -254,7 +254,37 @@ end_slice = pos+1
 snow_m = snow_fcst.isel(step=slice(0, end_slice)).unknown.sum(dim='step')
 end = snow_fcst.step[pos].valid_time.values.astype('datetime64[s]').astype(datetime).replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/Denver")).strftime('%I%p %a')
 
-# Replace the entire python-awips section (lines starting with "da = None" through "else:")
+# List of timestamps to download
+ts_list = [yesterdaystr + '12', yesterdaystr + '18', todaystr + '00', todaystr + '06']
+
+# Download and process NOHRSC data
+datasets = []
+for timestamp in ts_list:
+    accum_url = f"https://www.nohrsc.noaa.gov/snowfall_v2/data/{mo}/sfav2_CONUS_6h_{timestamp}.nc"
+    accum_name = f'{timestamp}_gridded.nc'
+
+    response = requests.get(accum_url, stream=True)
+    if response.status_code == 200:
+        with open(accum_name, "wb") as file:
+            for chunk in response.iter_content(chunk_size=8192):
+                file.write(chunk)
+        print(f"Downloaded: {accum_name}")
+
+        # Open the dataset
+        ds = xr.open_dataset(accum_name)
+        datasets.append(ds)
+    else:
+        print(f"Failed to download: {accum_url}")
+
+# Combine datasets and sum over time
+if datasets:
+    snow_accum_nohrsc = xr.concat(datasets, dim="time").sum(dim="time")
+    print("Successfully combined and summed NOHRSC snowfall datasets")
+    nohrsc = snow_accum_nohrsc
+else:
+    print("No files were successfully downloaded.")
+
+# NOW REPLACE THE python-awips SECTION WITH THIS:
 
 import rasterio
 from pyproj import Transformer
@@ -314,7 +344,7 @@ try:
     )
     
     # Convert to inches and sum with NOHRSC data
-    nbm_inches = nbm_regridded_xr * 39.3701  # Convert meters to inches
+    nbm_inches = nbm_regridded_xr.copy() # Convert meters to inches
     nohrsc_inches = nohrsc['Data'] * 39.3701  # Convert meters to inches
     
     # Sum the datasets
@@ -642,6 +672,7 @@ accum_trigger = log['accum'].values.max()
 # Main function to call the send_email function
 if __name__ == "__main__":
     if fcst_trigger >= 4 or accum_trigger >= 2 or len(co) != 0:
+    if fcst_trigger >= 4 or accum_trigger >= 2:
         send_email()
     else:
         print('Snow thresholds not met for distribution')
