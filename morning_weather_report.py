@@ -375,8 +375,21 @@ if da is not None:
 # Extract 2D coordinates from nbm
     nbm_lat = nbm['lat'].values  # Shape: (y, x)
     nbm_lon = nbm['lon'].values  # Shape: (y, x)
+
+    from pyproj import Transformer
+
+# NBM Lambert Conformal Conic -> WGS84
+    transformer = Transformer.from_crs("EPSG:6362", "EPSG:4326", always_xy=True)
+
+    proj_x = nbm_lon  # these are actually X coordinates in meters
+    proj_y = nbm_lat  # these are actually Y coordinates in meters
+
+# Convert to lon/lat
+    nbm_lon_deg, nbm_lat_deg = transformer.transform(proj_x, proj_y)
+
+    nbm_lat = nbm_lat_deg
+    nbm_lon = nbm_lon_deg
     print(nbm_lat[0:5])
-    print(nbm_lon[0:5])
 # Extract coordinates and data from nohrsc
     nohrsc_lat = nohrsc['lat'].values  # Shape: (lat,)
     nohrsc_lon = nohrsc['lon'].values  # Shape: (lon,)
