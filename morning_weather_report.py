@@ -255,59 +255,78 @@ snow_m = snow_fcst.isel(step=slice(0, end_slice)).unknown.sum(dim='step')
 end = snow_fcst.step[pos].valid_time.values.astype('datetime64[s]').astype(datetime).replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("America/Denver")).strftime('%I%p %a')
 
 da = None
-edexServer = "edex-beta.unidata.ucar.edu"
-DataAccessLayer.changeEDEXHost(edexServer)
-grid_request = DataAccessLayer.newDataRequest()
-grid_request.setDatatype("grid")
-grid_request.setLocationNames("NationalBlend")
-grid_request.setParameters("TOTSN1hr")
-grid_cycles = DataAccessLayer.getAvailableTimes(grid_request, True)
-grid_times = DataAccessLayer.getAvailableTimes(grid_request)
-grid_06z = None
-for cycle in grid_cycles:
-    ref_time = cycle.getRefTime()
-    ref_time_str = str(ref_time)
-    ref_time_datetime = datetime.strptime(ref_time_str, "%Y-%m-%d %H:%M:%S.%f")
-    if ref_time_datetime.hour == 6:
-        grid_06z = cycle
-        break
-if grid_06z is not None:
-    grid_fcstRun = DataAccessLayer.getForecastRun(grid_06z, grid_times)
-    print(f"Successfully selected 06Z run: {grid_06z}")
-    accum_end = '6am'
-    first_six_times = grid_fcstRun[:6]  # Get first six timesteps
+accum_end = '12am'
 
-# Step 5: Request grid data for selected timesteps
-    nbm_response = DataAccessLayer.getGridData(grid_request, first_six_times)
+try:
+    # Try production server instead of beta
+    edexServer = "edex-cloud.unidata.ucar.edu"
+    DataAccessLayer.changeEDEXHost(edexServer)
+    
+    grid_request = DataAccessLayer.newDataRequest()
+    grid_request.setDatatype("grid")
+    grid_request.setLocationNames("NationalBlend")
+    grid_request.setParameters("TOTSN1hr")
+    
+    print("Attempting to retrieve NBM data from AWIPS...")
+    grid_cycles = DataAccessLayer.getAvailableTimes(grid_request, True)
+    
+    if not grid_cycles:
+        raise ValueError("No grid cycles available")
+        
+    grid_times = DataAccessLayer.getAvailableTimes(grid_request)
+    
+    grid_06z = None
+    for cycle in grid_cycles:
+        ref_time = cycle.getRefTime()
+        ref_time_str = str(ref_time)
+        ref_time_datetime = datetime.strptime(ref_time_str, "%Y-%m-%d %H:%M:%S.%f")
+        if ref_time_datetime.hour == 6:
+            grid_06z = cycle
+            break
+    
+    if grid_06z is not None:
+        grid_fcstRun = DataAccessLayer.getForecastRun(grid_06z, grid_times)
+        print(f"Successfully selected 06Z run: {grid_06z}")
+        accum_end = '6am'
+        first_six_times = grid_fcstRun[:6]  # Get first six timesteps
 
-    snowfall_data_list = []
+        # Step 5: Request grid data for selected timesteps
+        nbm_response = DataAccessLayer.getGridData(grid_request, first_six_times)
 
-    for grid in nbm_response:
-        snowfall_data = np.array(grid.getRawData())
-    # Get lat/lon coordinates directly from the grid
-        lats, lons = grid.getLatLonCoords()
+        snowfall_data_list = []
 
-    # Since the data is rotated, we need to swap the lats and lons
-        lats, lons = lons, lats  # Swap latitude and longitude values
-    # Append the snowfall data
-        snowfall_data_list.append(snowfall_data)
+        for grid in nbm_response:
+            snowfall_data = np.array(grid.getRawData())
+            # Get lat/lon coordinates directly from the grid
+            lats, lons = grid.getLatLonCoords()
 
-# Step 7: Combine and sum over the first six timesteps
-    if snowfall_data_list:
-        snow_accum = np.sum(snowfall_data_list, axis=0)  # Sum over time dimension (axis 0)
+            # Since the data is rotated, we need to swap the lats and lons
+            lats, lons = lons, lats  # Swap latitude and longitude values
+            # Append the snowfall data
+            snowfall_data_list.append(snowfall_data)
 
-    # Create the final xarray DataArray with explicit dimension names
-        da = xr.DataArray(
-            snow_accum,
-            coords={"lat": (["y", "x"], lats), "lon": (["y", "x"], lons)},  # Use different dimension names
-            dims=["y", "x"]
-        )
-        print("Successfully summed first six timesteps of NAM snowfall.")
+        # Step 7: Combine and sum over the first six timesteps
+        if snowfall_data_list:
+            snow_accum = np.sum(snowfall_data_list, axis=0)  # Sum over time dimension (axis 0)
+
+            # Create the final xarray DataArray with explicit dimension names
+            da = xr.DataArray(
+                snow_accum,
+                coords={"lat": (["y", "x"], lats), "lon": (["y", "x"], lons)},  # Use different dimension names
+                dims=["y", "x"]
+            )
+            print("Successfully summed first six timesteps of NBM snowfall.")
+        else:
+            print("No data available.")
+            da = None
+
     else:
-        print("No data available.")
-
-else:
-    print("No 06Z cycle found in the available grid cycles.")
+        print("No 06Z cycle found in the available grid cycles.")
+        
+except Exception as e:
+    print(f"Error retrieving NBM data: {type(e).__name__}: {e}")
+    print("Continuing with NOHRSC data only...")
+    da = None
     accum_end = '12am'
 
 # List of timestamps to download
