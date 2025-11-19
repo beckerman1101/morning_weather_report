@@ -494,7 +494,7 @@ accum_map = snow_accumulation.plot(ax=ax1, x='lon', y='lat', transform=ccrs.Plat
                               cmap=cmaps, norm=norms, add_colorbar=False)
 fcst_map = snow_forecast.plot(ax=ax2, x='longitude', y='latitude', transform=ccrs.PlateCarree(),
                               cmap=cmaps, norm=norms, add_colorbar=False)
-ax1.set_title(f'Snowfall Accumulation: 12am yesterday - {accum_end} today', x=0, fontsize=70, ha='left', style='italic', pad=20)
+ax1.set_title(f'Snowfall Accumulation: 12am yesterday - 4am today', x=0, fontsize=70, ha='left', style='italic', pad=20)
 ax2.set_title(f'Forecasted Snowfall through {end}', x=0, fontsize=70, ha='left', style='italic', pad=20)
 
 # Setting up the snow colorbar
