@@ -2,7 +2,7 @@ name: Run Python Script Daily
 
 on:
   schedule:
-    - cron: '15 11 * * *'  # Daily at 11:15 UTC
+    - cron: '15 11 * * *'
   workflow_dispatch:
 
 jobs:
@@ -10,21 +10,20 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      # Step 1: Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Set up Mambaforge (faster & stable)
-      - name: Set up Mambaforge
+      # Fixed: Use Miniforge3 + mamba (Windows compatible)
+      - name: Set up Conda (Miniforge + mamba)
         uses: conda-incubator/setup-miniconda@v3
         with:
-          miniforge-variant: Mambaforge
+          miniforge-variant: Miniforge3
+          use-mamba: true
           python-version: "3.11"
           auto-activate-base: true
           channels: conda-forge
           channel-priority: strict
 
-      # Step 3: Create environment & install all dependencies
       - name: Install dependencies (conda + pip)
         shell: bash -l {0}
         run: |
@@ -32,7 +31,6 @@ jobs:
           pip install PyGithub
           pip install -r requirements.txt
 
-      # -------- Retry Logic ----------
       - name: Run Report script (Attempt 1)
         id: attempt1
         shell: bash -l {0}
@@ -56,3 +54,32 @@ jobs:
           GMAIL_PW: ${{ secrets.GMAIL_PW }}
         run: python morning_weather_report.py
         continue-on-error: true
+
+      - name: Wait before Retry 3
+        if: steps.attempt2.outcome == 'failure'
+        shell: bash -l {0}
+        run: sleep 300
+
+      - name: Run Report script (Attempt 3)
+        id: attempt3
+        if: steps.attempt2.outcome == 'failure'
+        shell: bash -l {0}
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          GMAIL_PW: ${{ secrets.GMAIL_PW }}
+        run: python morning_weather_report.py
+        continue-on-error: true
+
+      - name: Wait before Final Retry
+        if: steps.attempt3.outcome == 'failure'
+        shell: bash -l {0}
+        run: sleep 300
+
+      - name: Run Report script (Final Attempt)
+        id: final_attempt
+        if: steps.attempt3.outcome == 'failure'
+        shell: bash -l {0}
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          GMAIL_PW: ${{ secrets.GMAIL_PW }}
+        run: python morning_weather_report.py
