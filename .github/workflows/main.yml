@@ -8,7 +8,7 @@ jobs:
     runs-on: windows-latest
     defaults:
       run:
-        shell: bash -l {0}
+        shell: powershell
     steps:
       # Step 1: Checkout the repository
       - name: Checkout repository
