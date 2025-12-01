@@ -1,19 +1,22 @@
 name: Run Python Script Daily
-
 on:
   schedule:
-    - cron: '15 11 * * *'   # 11:15 UTC daily
+    - cron: '15 11 * * *'  # Daily at 11:15 UTC
   workflow_dispatch:
 
 jobs:
   run-script:
     runs-on: windows-latest
-
+    defaults:
+      run:
+        shell: cmd
     steps:
+      # Step 1: Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Miniconda
+      # Step 2: Set up Miniconda and environment
+      - name: Set up Miniconda and install dependencies
         uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
@@ -23,58 +26,53 @@ jobs:
           channels: conda-forge,defaults
           channel-priority: strict
 
+      # Step 3: Verify environment
+      - name: List installed packages
+        run: conda list
 
-      - name: Verify environment
-        run: |
-          conda info
-          conda list
-
-      # ----- RUN SCRIPT WITH MULTIPLE RETRIES -----
+      # Step 4: Run the script with retries
       - name: Run Report script (Attempt 1)
         id: attempt1
-        env:
+        env: 
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
           GMAIL_PW: ${{ secrets.GMAIL_PW }}
-        shell: cmd
         run: python morning_weather_report.py
         continue-on-error: true
 
       - name: Wait before Retry 2
         if: steps.attempt1.outcome == 'failure'
-        run: sleep 300
+        run: timeout /t 300
 
       - name: Run Report script (Attempt 2)
         id: attempt2
         if: steps.attempt1.outcome == 'failure'
-        env:
+        env: 
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
           GMAIL_PW: ${{ secrets.GMAIL_PW }}
-        shell: cmd
         run: python morning_weather_report.py
         continue-on-error: true
 
       - name: Wait before Retry 3
         if: steps.attempt2.outcome == 'failure'
-        run: sleep 300
+        run: timeout /t 300
 
       - name: Run Report script (Attempt 3)
         id: attempt3
         if: steps.attempt2.outcome == 'failure'
-        env:
+        env: 
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
           GMAIL_PW: ${{ secrets.GMAIL_PW }}
-        shell: cmd
         run: python morning_weather_report.py
         continue-on-error: true
 
       - name: Wait before Final Retry
         if: steps.attempt3.outcome == 'failure'
-        run: sleep 300
+        run: timeout /t 300
 
       - name: Run Report script (Final Attempt)
+        id: final_attempt
         if: steps.attempt3.outcome == 'failure'
-        env:
+        env: 
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
           GMAIL_PW: ${{ secrets.GMAIL_PW }}
-        shell: cmd
         run: python morning_weather_report.py
