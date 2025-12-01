@@ -24,8 +24,6 @@ dependencies:
   - rasterio
   - pyproj
   - ipython
-  - pyqt=5
-  - pyqtwebengine
   - pillow
   - pip
   - pip:
