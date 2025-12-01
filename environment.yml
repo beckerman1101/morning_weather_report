@@ -1,7 +1,6 @@
 name: weather-env
 channels:
   - conda-forge
-  - defaults
 dependencies:
   - python=3.11
   - numpy=1.26
@@ -22,11 +21,13 @@ dependencies:
   - cfgrib
   - eccodes
   - rioxarray
+  - rasterio
+  - pyproj
   - ipython
   - pyqt=5
   - pyqtwebengine
+  - pillow
   - pip
   - pip:
       - PyGithub
-      - sendgrid
       - python-awips
