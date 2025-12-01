@@ -17,7 +17,7 @@ dependencies:
   - geopandas
   - shapely
   - cartopy
-  - gdal=3.7
+  - gdal
   - pyogrio
   - cfgrib
   - eccodes
