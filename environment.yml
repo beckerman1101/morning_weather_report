@@ -8,6 +8,7 @@ dependencies:
   - scipy
   - pandas
   - xarray
+  - netcdf4
   - matplotlib
   - scikit-image
   - tqdm
