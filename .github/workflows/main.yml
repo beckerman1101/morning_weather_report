@@ -3,18 +3,17 @@ on:
   schedule:
     - cron: '15 11 * * *'  # Daily at 11:15 UTC
   workflow_dispatch:
-
 jobs:
   run-script:
     runs-on: windows-latest
     defaults:
       run:
-        shell: cmd
+        shell: bash -el {0}  # Critical: ensures conda env is activated
     steps:
       # Step 1: Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v3
-
+      
       # Step 2: Set up Miniconda and environment
       - name: Set up Miniconda and install dependencies
         uses: conda-incubator/setup-miniconda@v3
@@ -25,11 +24,14 @@ jobs:
           python-version: 3.11
           channels: conda-forge,defaults
           channel-priority: strict
-
+          auto-activate-base: false
+      
       # Step 3: Verify environment
       - name: List installed packages
-        run: conda list
-
+        run: |
+          conda info
+          conda list
+      
       # Step 4: Run the script with retries
       - name: Run Report script (Attempt 1)
         id: attempt1
@@ -38,11 +40,11 @@ jobs:
           GMAIL_PW: ${{ secrets.GMAIL_PW }}
         run: python morning_weather_report.py
         continue-on-error: true
-
+      
       - name: Wait before Retry 2
         if: steps.attempt1.outcome == 'failure'
-        run: timeout /t 300
-
+        run: sleep 300
+      
       - name: Run Report script (Attempt 2)
         id: attempt2
         if: steps.attempt1.outcome == 'failure'
@@ -51,11 +53,11 @@ jobs:
           GMAIL_PW: ${{ secrets.GMAIL_PW }}
         run: python morning_weather_report.py
         continue-on-error: true
-
+      
       - name: Wait before Retry 3
         if: steps.attempt2.outcome == 'failure'
-        run: timeout /t 300
-
+        run: sleep 300
+      
       - name: Run Report script (Attempt 3)
         id: attempt3
         if: steps.attempt2.outcome == 'failure'
@@ -64,11 +66,11 @@ jobs:
           GMAIL_PW: ${{ secrets.GMAIL_PW }}
         run: python morning_weather_report.py
         continue-on-error: true
-
+      
       - name: Wait before Final Retry
         if: steps.attempt3.outcome == 'failure'
-        run: timeout /t 300
-
+        run: sleep 300
+      
       - name: Run Report script (Final Attempt)
         id: final_attempt
         if: steps.attempt3.outcome == 'failure'
