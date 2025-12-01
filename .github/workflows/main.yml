@@ -3,9 +3,11 @@ on:
   schedule:
     - cron: '15 11 * * *'  # Daily at 11:15 UTC
   workflow_dispatch:
+
 jobs:
   run-script:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -18,9 +20,15 @@ jobs:
           activate-environment: weather-env
           environment-file: environment.yml
           python-version: 3.11
-          channels: conda-forge,defaults
+          channels: conda-forge
           channel-priority: strict
           auto-activate-base: false
+      
+      - name: Cache conda environment
+        uses: actions/cache@v3
+        with:
+          path: /usr/share/miniconda/envs/weather-env
+          key: conda-${{ hashFiles('environment.yml') }}
       
       - name: List installed packages
         shell: bash -el {0}
@@ -77,3 +85,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
           GMAIL_PW: ${{ secrets.GMAIL_PW }}
         run: python morning_weather_report.py
+      
+      - name: Upload report as artifact
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: weather-report-${{ github.run_number }}
+          path: '*_MWR.png'
+          retention-days: 7
