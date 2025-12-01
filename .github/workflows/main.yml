@@ -1,85 +1,58 @@
 name: Run Python Script Daily
+
 on:
-  schedule:  # Runs daily at 10:00 UTC
-    - cron: '15 11 * * *'
-  workflow_dispatch:  # Allows manual execution
+  schedule:
+    - cron: '15 11 * * *'  # Daily at 11:15 UTC
+  workflow_dispatch:
+
 jobs:
   run-script:
     runs-on: windows-latest
-    defaults:
-      run:
-        shell: cmd
+
     steps:
-      # Step 1: Checkout the repository
+      # Step 1: Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
-      
-      # Step 2: Set up Conda with Python
-      - name: Set up Miniconda
+
+      # Step 2: Set up Mambaforge (faster & stable)
+      - name: Set up Mambaforge
         uses: conda-incubator/setup-miniconda@v3
         with:
-          auto-update-conda: true
-          python-version: '3.11'
-          channels: conda-forge,defaults
-          channel-priority: flexible
-      
-      # Step 3: Install GDAL and dependencies
-      - name: Install dependencies
+          miniforge-variant: Mambaforge
+          python-version: "3.11"
+          auto-activate-base: true
+          channels: conda-forge
+          channel-priority: strict
+
+      # Step 3: Create environment & install all dependencies
+      - name: Install dependencies (conda + pip)
+        shell: bash -l {0}
         run: |
-          conda install -c conda-forge gdal pyogrio -y
+          mamba install -y gdal pyogrio
           pip install PyGithub
-          grep -v "^gdal$" requirements.txt | grep -v "^pyogrio$" > temp_requirements.txt || true
-          pip install -r temp_requirements.txt
-      
-      # Step 4: Run the report script (Attempt 1)
+          pip install -r requirements.txt
+
+      # -------- Retry Logic ----------
       - name: Run Report script (Attempt 1)
         id: attempt1
-        env: 
+        shell: bash -l {0}
+        env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
           GMAIL_PW: ${{ secrets.GMAIL_PW }}
         run: python morning_weather_report.py
-        continue-on-error: true  
-      
-      # Step 5: Wait before retrying (if Attempt 1 fails)
+        continue-on-error: true
+
       - name: Wait before Retry 2
         if: steps.attempt1.outcome == 'failure'
+        shell: bash -l {0}
         run: sleep 300
-      
-      # Step 6: Run the report script (Attempt 2)
+
       - name: Run Report script (Attempt 2)
         id: attempt2
         if: steps.attempt1.outcome == 'failure'
-        env: 
+        shell: bash -l {0}
+        env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
           GMAIL_PW: ${{ secrets.GMAIL_PW }}
         run: python morning_weather_report.py
-        continue-on-error: true  
-      
-      # Step 7: Wait before retrying (if Attempt 2 fails)
-      - name: Wait before Retry 3
-        if: steps.attempt2.outcome == 'failure'
-        run: sleep 300
-      
-      # Step 8: Run the report script (Attempt 3)
-      - name: Run Report script (Attempt 3)
-        id: attempt3
-        if: steps.attempt2.outcome == 'failure'
-        env: 
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
-          GMAIL_PW: ${{ secrets.GMAIL_PW }}
-        run: python morning_weather_report.py
-        continue-on-error: true  
-      
-      # Step 9: Final Wait before last attempt
-      - name: Wait before Final Retry
-        if: steps.attempt3.outcome == 'failure'
-        run: sleep 300
-      
-      # Step 10: Final attempt if all previous attempts failed
-      - name: Run Report script (Final Attempt)
-        id: final_attempt
-        if: steps.attempt3.outcome == 'failure'
-        env: 
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
-          GMAIL_PW: ${{ secrets.GMAIL_PW }}
-        run: python morning_weather_report.py
+        continue-on-error: true
