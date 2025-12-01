@@ -10,7 +10,7 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Set up Miniconda and install dependencies
         uses: conda-incubator/setup-miniconda@v3
@@ -25,7 +25,7 @@ jobs:
           auto-activate-base: false
       
       - name: Cache conda environment
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: /usr/share/miniconda/envs/weather-env
           key: conda-${{ hashFiles('environment.yml') }}
@@ -57,39 +57,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
           GMAIL_PW: ${{ secrets.GMAIL_PW }}
         run: python morning_weather_report.py
-        continue-on-error: true
-      
-      - name: Wait before Retry 3
-        if: steps.attempt2.outcome == 'failure'
-        run: sleep 300
-      
-      - name: Run Report script (Attempt 3)
-        shell: bash -el {0}
-        id: attempt3
-        if: steps.attempt2.outcome == 'failure'
-        env: 
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
-          GMAIL_PW: ${{ secrets.GMAIL_PW }}
-        run: python morning_weather_report.py
-        continue-on-error: true
-      
-      - name: Wait before Final Retry
-        if: steps.attempt3.outcome == 'failure'
-        run: sleep 300
-      
-      - name: Run Report script (Final Attempt)
-        shell: bash -el {0}
-        id: final_attempt
-        if: steps.attempt3.outcome == 'failure'
-        env: 
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
-          GMAIL_PW: ${{ secrets.GMAIL_PW }}
-        run: python morning_weather_report.py
-      
-      - name: Upload report as artifact
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: weather-report-${{ github.run_number }}
-          path: '*_MWR.png'
-          retention-days: 7
+        continue-on-error:
