@@ -12,6 +12,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       
+      - name: Clean conda cache
+        run: |
+          rm -rf ~/.conda/pkgs/*
+          rm -rf ~/conda_pkgs_dir/*
+        continue-on-error: true
+      
       - name: Set up Miniconda and install dependencies
         uses: conda-incubator/setup-miniconda@v3
         with:
@@ -21,14 +27,17 @@ jobs:
           environment-file: environment.yml
           python-version: 3.11
           channels: conda-forge
-          channel-priority: strict
+          channel-priority: flexible
           auto-activate-base: false
+        env:
+          CONDA_SOLVER: libmamba
       
-      - name: List installed packages
+      - name: Verify environment
         shell: bash -el {0}
         run: |
           conda info
           conda list
+          python --version
       
       - name: Run Report script (Attempt 1)
         shell: bash -el {0}
