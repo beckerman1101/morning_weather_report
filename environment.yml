@@ -3,60 +3,29 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  # Core scientific stack (binary)
   - python=3.11
-  - numpy
+  - numpy=1.26
   - scipy
   - pandas
   - xarray
   - matplotlib
   - scikit-image
-  - cmasher
-  - colorspacious
-
-  # Geospatial stack (binary)
-  - gdal
+  - tqdm
+  - requests
+  - beautifulsoup4
   - geopandas
   - shapely
   - cartopy
+  - gdal=3.7
   - pyogrio
   - cfgrib
   - eccodes
-  - h5netcdf
   - rioxarray
-
-  # UI (binary; optional but included because you had them)
-  - pyqt
+  - ipython
+  - pyqt=5
   - pyqtwebengine
-
-  # Other binary libs that sometimes cause pip issues
-  - cryptography
-  - protobuf
-  - googleapis-common-protos
-  - setuptools
-  - wheel
-
-  # Pip section (pure Python only)
   - pip
   - pip:
-      - appdirs
-      - atomicwrites
-      - backcall
-      - beautifulsoup4
-      - tqdm
-      - requests
-      - requests-oauthlib
-      - oauthlib
-      - rsa
-      - paramiko
-      - cmasher
-      - gitpython
-      - google-api-core
-      - google-api-python-client
-      - google-auth
-      - google-auth-httplib2
-      - google-auth-oauthlib
-      - proto-plus
-      - python-awips
+      - PyGithub
       - sendgrid
-      - yarg
+      - python-awips
