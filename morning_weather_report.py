@@ -516,8 +516,8 @@ def wrap_label(text, width=8):
 
 ax3.set_xlim(0,50.7485)
 ax3.set_ylim(0,20)
-ax3.text(1, 18, 'Key Messages:', fontsize=80, ha='left')
-ax3.text(30, 18, '48-Hr Forecasted Snow in High Traffic Areas', fontsize=80, ha='left')
+ax3.text(1, 17.75, 'Key Messages:', fontsize=80, ha='left')
+ax3.text(30, 17.75, '48-Hr Forecasted Snow in High Traffic Areas', fontsize=80, ha='left')
 for i in range(len(afdtext)):
     string = wrap_label(afdtext[i], width=64)
     length = len(string.split('\n'))
@@ -626,7 +626,7 @@ SENDER_EMAIL = "beckerman1101@gmail.com"
 SENDER_PASSWORD = os.getenv('GMAIL_PW')
 
 # Recipient email
-RECIPIENT_EMAILS = ["brendan.eckerman@state.co.us"]#, "michael.chapman@state.co.us", "nicholas.barlow@state.co.us","bob.fifer@state.co.us","shawn.smith@state.co.us","james.fox@state.co.us","phillip.embry@state.co.us"]
+RECIPIENT_EMAILS = ["brendan.eckerman@state.co.us", "michael.chapman@state.co.us", "nicholas.barlow@state.co.us","bob.fifer@state.co.us","shawn.smith@state.co.us","james.fox@state.co.us","phillip.embry@state.co.us"]
 
 # Email Subject & Body
 SUBJECT = f"Morning Weather Report - {todayst}"
