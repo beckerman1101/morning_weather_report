@@ -519,26 +519,26 @@ ax3.set_ylim(0,20)
 ax3.text(1, 17, 'Key Messages:', fontsize=80, ha='left')
 ax3.text(30, 17, '48-Hr Forecasted Snow in High Traffic Areas', fontsize=80, ha='left')
 for i in range(len(afdtext)):
-    string = wrap_label(afdtext[i], width=60)
+    string = wrap_label(afdtext[i], width=64)
     length = len(string.split('\n'))
     if length>=5 and i==0:
         y=12.5
-        ax3.text(1, y, f'- {string}', fontsize=54, ha='left', style='italic')
+        ax3.text(1, y, f'- {string}', fontsize=50, ha='left', style='italic')
     elif length<=2 and i==0:
         y=15
-        ax3.text(1, y, f'- {string}', fontsize=54, ha='left', style='italic')
+        ax3.text(1, y, f'- {string}', fontsize=50, ha='left', style='italic')
     elif length>=3 and i==0:
         y=13.25
-        ax3.text(1, y, f'- {string}', fontsize=54, ha='left', style='italic')
+        ax3.text(1, y, f'- {string}', fontsize=50, ha='left', style='italic')
     if length>=5 and i!=0:
         y-=5.5
-        ax3.text(1, y, f'- {string}', fontsize=54, ha='left', style='italic')
+        ax3.text(1, y, f'- {string}', fontsize=50, ha='left', style='italic')
     elif length<=2 and i!=0:
         y-=3
-        ax3.text(1, y, f'- {string}', fontsize=54, ha='left', style='italic')  
+        ax3.text(1, y, f'- {string}', fontsize=50, ha='left', style='italic')  
     elif length>=3 and i!=0:
         y-=4
-        ax3.text(1, y, f'- {string}', fontsize=54, ha='left', style='italic')
+        ax3.text(1, y, f'- {string}', fontsize=50, ha='left', style='italic')
 ax3.axis('off')
 # Snow Forecast values
 
@@ -626,7 +626,7 @@ SENDER_EMAIL = "beckerman1101@gmail.com"
 SENDER_PASSWORD = os.getenv('GMAIL_PW')
 
 # Recipient email
-RECIPIENT_EMAILS = ["brendan.eckerman@state.co.us", "michael.chapman@state.co.us", "nicholas.barlow@state.co.us","bob.fifer@state.co.us","shawn.smith@state.co.us","james.fox@state.co.us","phillip.embry@state.co.us"]
+RECIPIENT_EMAILS = ["brendan.eckerman@state.co.us"]#, "michael.chapman@state.co.us", "nicholas.barlow@state.co.us","bob.fifer@state.co.us","shawn.smith@state.co.us","james.fox@state.co.us","phillip.embry@state.co.us"]
 
 # Email Subject & Body
 SUBJECT = f"Morning Weather Report - {todayst}"
