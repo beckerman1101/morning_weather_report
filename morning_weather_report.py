@@ -516,8 +516,8 @@ def wrap_label(text, width=8):
 
 ax3.set_xlim(0,50.7485)
 ax3.set_ylim(0,20)
-ax3.text(1, 17, 'Key Messages:', fontsize=80, ha='left')
-ax3.text(30, 17, '48-Hr Forecasted Snow in High Traffic Areas', fontsize=80, ha='left')
+ax3.text(1, 18, 'Key Messages:', fontsize=80, ha='left')
+ax3.text(30, 18, '48-Hr Forecasted Snow in High Traffic Areas', fontsize=80, ha='left')
 for i in range(len(afdtext)):
     string = wrap_label(afdtext[i], width=64)
     length = len(string.split('\n'))
