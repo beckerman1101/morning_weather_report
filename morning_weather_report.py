@@ -260,8 +260,13 @@ ts_list = [yesterdaystr + '12', yesterdaystr + '18', todaystr + '00', todaystr +
 # Download and process NOHRSC data
 datasets = []
 for timestamp in ts_list:
-    accum_url = f"https://www.nohrsc.noaa.gov/snowfall_v2/data/{mo}/sfav2_CONUS_6h_{timestamp}.nc"
-    accum_name = f'{timestamp}_gridded.nc'
+    ts_dt = datetime.strptime(timestamp, "%Y%m%d%H")
+    mo_ts = ts_dt.strftime('%Y%m')
+
+    accum_url = (
+        f"https://www.nohrsc.noaa.gov/snowfall_v2/data/"
+        f"{mo_ts}/sfav2_CONUS_6h_{timestamp}.nc")
+
 
     response = requests.get(accum_url, stream=True)
     if response.status_code == 200:
