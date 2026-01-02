@@ -266,7 +266,7 @@ for timestamp in ts_list:
     accum_url = (
         f"https://www.nohrsc.noaa.gov/snowfall_v2/data/"
         f"{mo_ts}/sfav2_CONUS_6h_{timestamp}.nc")
-
+    accum_name = f'{ts_dt}_gridded.nc'
 
     response = requests.get(accum_url, stream=True)
     if response.status_code == 200:
@@ -631,7 +631,7 @@ SENDER_EMAIL = "beckerman1101@gmail.com"
 SENDER_PASSWORD = os.getenv('GMAIL_PW')
 
 # Recipient email
-RECIPIENT_EMAILS = ["brendan.eckerman@state.co.us", "michael.chapman@state.co.us", "nicholas.barlow@state.co.us","bob.fifer@state.co.us","shawn.smith@state.co.us","james.fox@state.co.us","phillip.embry@state.co.us"]
+RECIPIENT_EMAILS = ["brendan.eckerman@state.co.us"]#, "michael.chapman@state.co.us", "nicholas.barlow@state.co.us","bob.fifer@state.co.us","shawn.smith@state.co.us","james.fox@state.co.us","phillip.embry@state.co.us"]
 
 # Email Subject & Body
 SUBJECT = f"Morning Weather Report - {todayst}"
