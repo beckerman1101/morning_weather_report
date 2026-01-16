@@ -631,11 +631,11 @@ SENDER_EMAIL = "beckerman1101@gmail.com"
 SENDER_PASSWORD = os.getenv('GMAIL_PW')
 
 # Recipient email
-RECIPIENT_EMAILS = ["brendan.eckerman@state.co.us", "michael.chapman@state.co.us", "nicholas.barlow@state.co.us","bob.fifer@state.co.us","shawn.smith@state.co.us","james.fox@state.co.us","phillip.embry@state.co.us"]
+RECIPIENT_EMAILS = ["brendan.eckerman@state.co.us"]#, "michael.chapman@state.co.us", "nicholas.barlow@state.co.us","bob.fifer@state.co.us","shawn.smith@state.co.us","james.fox@state.co.us","phillip.embry@state.co.us"]
 
 # Email Subject & Body
 SUBJECT = f"Morning Weather Report - {todayst}"
-BODY = "Attached is today's Morning Weather Report. If you have questions or the report appears to have had issues in the process of its creation, please reach out to Brendan at brendan.eckerman@state.co.us\n\nPlease note that accumulated snowfall data is preliminary and has not been refined for quality control. It is also derived from radar data, which is susceptible to errors along terrain features."
+BODY = "Attached is today's Morning Weather Report. If you have questions or the report appears to have had issues in the process of its creation, please reach out to Brendan at brendan.eckerman@state.co.us\n\nA few notes:\n-Accumulated snowfall data is preliminary and has not been refined for quality control. It is also derived from radar data, which is susceptible to errors along terrain features.\n-Contingencies are in place to attempt to avoid overlapping text in the Key Messages section, but occasionally NWS Boulder has many notes to cover, and some overlapping may still occur.\n-The report may be generated based on the presence of winter/wind-related watches and warnings that are not yet active. Please refer to the appropriate WFO for confirmation of timing/impacts"
 
 # Path to the PNG file
 ATTACHMENT_PATH = file_path # Update with your PNG file path
