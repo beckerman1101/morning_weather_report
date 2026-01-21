@@ -148,8 +148,6 @@ snow_labels = ['','0.1"','1"','2"','3"','4"','5"','6"','8"','10"','12"','14"','1
 
 #WWA colorbar
 wwa_colors = {
-    "Red Flag Warning": "#F60093",
-    "High Wind Warning": "#D6A330",
     "Blizzard Warning": "#F73B19",
     "Winter Weather Advisory": '#7B6AEB',
     "Winter Storm Warning": "#F865B3",
@@ -631,7 +629,7 @@ SENDER_EMAIL = "beckerman1101@gmail.com"
 SENDER_PASSWORD = os.getenv('GMAIL_PW')
 
 # Recipient email
-RECIPIENT_EMAILS = ["brendan.eckerman@state.co.us", "michael.chapman@state.co.us", "nicholas.barlow@state.co.us","bob.fifer@state.co.us","shawn.smith@state.co.us","james.fox@state.co.us","phillip.embry@state.co.us"]
+RECIPIENT_EMAILS = ["brendan.eckerman@state.co.us"]#, "michael.chapman@state.co.us", "nicholas.barlow@state.co.us","bob.fifer@state.co.us","shawn.smith@state.co.us","james.fox@state.co.us","phillip.embry@state.co.us"]
 
 # Email Subject & Body
 SUBJECT = f"Morning Weather Report - {todayst}"
