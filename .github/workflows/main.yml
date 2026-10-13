@@ -1,7 +1,5 @@
 name: Run Python Script Daily
 on:
-  schedule:
-    - cron: '07 11 * * *'
   workflow_dispatch:
 
 jobs:
