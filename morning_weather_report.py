@@ -514,6 +514,103 @@ cax.set_anchor('W')
 def wrap_label(text, width=8):
     return "\n".join(textwrap.wrap(text, width=width, break_long_words=False))
 
+#### ---- KEY MESSAGES FITTING ---- ####
+
+# The Key Messages sit between two blue bars at the bottom left of the report. These are the bars'
+# positions (as fractions of the figure). They are used both to draw the bars (further down) and to
+# work out how much room the text has, so the text can never spill past them.
+
+KM_BAR_LEFT = 0.025
+KM_BAR_RIGHT = 0.305
+KM_BAR_BOTTOM = 0.0075
+KM_BAR_HEIGHT = 0.385
+
+def settle_layout():
+    # Runs the layout engine so any positions/sizes read afterward match what gets saved
+    try:
+        fig.draw_without_rendering()
+    except AttributeError:
+        fig.canvas.draw()
+
+def draw_key_messages(ax, messages, x0=1.0, y_top=16.9, pad_x=1.0, pad_y=0.6,
+                      max_fs=50, min_fs=24, step=2):
+    # Draws the AFD key messages inside the box framed by the blue bars.
+    #  - Lines are wrapped by measured width (not a character count), with a hanging indent
+    #  - The font starts at max_fs (what the report has always used) and shrinks until everything fits
+    #  - If it still doesn't fit at min_fs, trailing messages are dropped and a note is added
+    # x0 / y_top are the top-left of the text in ax3's data units (y_top sits just under the heading)
+    # pad_x / pad_y are the gaps (data units) left between the text and the right / bottom bars
+
+    renderer = fig.canvas.get_renderer()
+    to_px = ax.transData.transform
+    to_data = ax.transData.inverted().transform
+
+    if not messages:
+        messages = ['No key messages were available in the latest NWS Boulder AFD.']
+
+    # Box edges in data units. Right and bottom come from the blue bars
+    bar_x, bar_y = to_data(fig.transFigure.transform((KM_BAR_RIGHT, KM_BAR_BOTTOM)))
+    x1 = bar_x - pad_x
+    y_bot = bar_y + pad_y
+    box_w = (to_px((x1, 0))[0] - to_px((x0, 0))[0]) * 0.98   # small safety margin on width
+    box_h = to_px((0, y_top))[1] - to_px((0, y_bot))[1]
+
+    note = '[List shortened to fit - see the full NWS Boulder AFD]'
+
+    def layout(msgs, fs):
+        fp = trebi.copy()
+        fp.set_size(fs)
+        text_w = lambda s: renderer.get_text_width_height_descent(s, fp, False)[0]
+        indent = text_w('- ')
+        line_h = renderer.points_to_pixels(fs * 1.25)
+        gap = line_h * 0.6
+        blocks = []
+        for m in msgs:
+            lines, cur = [], ''
+            for word in m.split():
+                trial = f'{cur} {word}'.strip()
+                if cur and text_w(trial) > box_w - indent:
+                    lines.append(cur)
+                    cur = word
+                else:
+                    cur = trial
+            if cur:
+                lines.append(cur)
+            blocks.append(lines)
+        height = sum(len(b) for b in blocks) * line_h + gap * (len(blocks) - 1)
+        return fp, indent, line_h, gap, blocks, height
+
+    result = None
+    n = len(messages)
+    while n > 0 and result is None:
+        shown = messages[:n] + ([note] if n < len(messages) else [])
+        for fs in range(max_fs, min_fs - 1, -step):
+            res = layout(shown, fs)
+            if res[-1] <= box_h:
+                result = res
+                break
+        n -= 1
+    if result is None:
+        result = layout([note], min_fs)
+
+    fp, indent, line_h, gap, blocks, _ = result
+    ascent = renderer.points_to_pixels(fp.get_size_in_points()) * 0.8
+    x0_px = to_px((x0, 0))[0]
+    y_px = to_px((0, y_top))[1]
+    for lines in blocks:
+        for j, line in enumerate(lines):
+            if j == 0:
+                bx, by = to_data((x0_px, y_px - ascent))
+                t = ax.text(bx, by, '-', fontproperties=fp, ha='left', va='baseline')
+                t.set_in_layout(False)
+            tx, ty = to_data((x0_px + indent, y_px - ascent))
+            t = ax.text(tx, ty, line, fontproperties=fp, ha='left', va='baseline')
+            t.set_in_layout(False)
+            y_px -= line_h
+        y_px -= gap
+
+#### ---- END KEY MESSAGES FITTING ---- ####
+
 # Whole lot of messy code for info on the bottom half of the report
 
 
@@ -521,27 +618,7 @@ ax3.set_xlim(0,50.7485)
 ax3.set_ylim(0,20)
 ax3.text(1, 17.75, 'Key Messages:', fontsize=80, ha='left')
 ax3.text(30, 17.75, '48-Hr Forecasted Snow in High Traffic Areas', fontsize=80, ha='left')
-for i in range(len(afdtext)):
-    string = wrap_label(afdtext[i], width=64)
-    length = len(string.split('\n'))
-    if length>=5 and i==0:
-        y=12.5
-        ax3.text(1, y, f'- {string}', fontsize=50, ha='left', style='italic')
-    elif length<=2 and i==0:
-        y=15
-        ax3.text(1, y, f'- {string}', fontsize=50, ha='left', style='italic')
-    elif length>=3 and i==0:
-        y=13.25
-        ax3.text(1, y, f'- {string}', fontsize=50, ha='left', style='italic')
-    if length>=5 and i!=0:
-        y-=5.5
-        ax3.text(1, y, f'- {string}', fontsize=50, ha='left', style='italic')
-    elif length<=2 and i!=0:
-        y-=3
-        ax3.text(1, y, f'- {string}', fontsize=50, ha='left', style='italic')  
-    elif length>=3 and i!=0:
-        y-=4
-        ax3.text(1, y, f'- {string}', fontsize=50, ha='left', style='italic')
+# The Key Messages text itself is drawn further down (draw_key_messages), once the final layout is known
 ax3.axis('off')
 # Snow Forecast values
 
@@ -595,22 +672,35 @@ legend_ax.set_position(legend_axpos)
 cax.set_position(caxpos)
 wwa_ax.set_position(wwa_axpos)
 fig.subplots_adjust(left=0, right=1, top=1, bottom=0)
+
+# Key Messages: everything else is in place, so lock in the layout, then fit the text to its box
+
+settle_layout()
+draw_key_messages(ax3, afdtext)
+
+# Header placement: the map titles sit just above the maps, so measure where they actually end and
+# push the whole header (bands, title, timestamp, logos) up if it would otherwise overlap them
+
+renderer = fig.canvas.get_renderer()
+title_top = max(a.title.get_window_extent(renderer).y1 for a in (ax1, ax2)) / fig.bbox.height
+hdr = max(0, title_top + 0.008 - 0.940)   # 0.940 is the bottom of the orange band's default spot
+
 # Graphic Design adds
 
-fig.patches.append(mpatches.Rectangle((0, 0.95), 1, 0.13, transform=fig.transFigure, facecolor='#F2F2F2', zorder=-1))
-fig.patches.append(mpatches.Rectangle((0, 0.940), 1, 0.015, transform=fig.transFigure, facecolor='#EF7521', zorder=-1))
-fig.patches.append(mpatches.Rectangle((0.025, 0.0075), 0.01, 0.385, transform=fig.transFigure, facecolor='#001970', zorder=15))
-fig.patches.append(mpatches.Rectangle((0.305, 0.0075), 0.01, 0.385, transform=fig.transFigure, facecolor='#001970', zorder=15))
+fig.patches.append(mpatches.Rectangle((0, 0.95 + hdr), 1, 0.13, transform=fig.transFigure, facecolor='#F2F2F2', zorder=-1))
+fig.patches.append(mpatches.Rectangle((0, 0.940 + hdr), 1, 0.015, transform=fig.transFigure, facecolor='#EF7521', zorder=-1))
+fig.patches.append(mpatches.Rectangle((KM_BAR_LEFT, KM_BAR_BOTTOM), 0.01, KM_BAR_HEIGHT, transform=fig.transFigure, facecolor='#001970', zorder=15))
+fig.patches.append(mpatches.Rectangle((KM_BAR_RIGHT, KM_BAR_BOTTOM), 0.01, KM_BAR_HEIGHT, transform=fig.transFigure, facecolor='#001970', zorder=15))
 
 # Final touches and exporting the figure
 # If this part uses too much RAM, add dpi=50 to the end of the last line within the )
 # The default value is 100, so just making a smaller export figure will use less memory
 
-fig.suptitle(' ', x=0, y=1.07, fontsize=240, ha='left')
-fig.text(0.025, 1.004, f'Winter Weather Report: {todayst}', fontsize=200, weight='bold', style='italic')
-fig.text(0.04, 0.967, f'Valid as of {ts}', fontsize=80, weight='bold', style='italic')
-fig.figimage(cdotlogo, 5500, 4250, zorder=20)
-fig.figimage(nws, 8500, 4325, zorder=20)
+fig.suptitle(' ', x=0, y=1.07 + hdr, fontsize=240, ha='left')
+fig.text(0.025, 1.004 + hdr, f'Winter Weather Report: {todayst}', fontsize=200, weight='bold', style='italic')
+fig.text(0.04, 0.967 + hdr, f'Valid as of {ts}', fontsize=80, weight='bold', style='italic')
+fig.figimage(cdotlogo, 5500, int(4250 + hdr * fig.bbox.height), zorder=20)
+fig.figimage(nws, 8500, int(4325 + hdr * fig.bbox.height), zorder=20)
 file_path = os.path.join(base_dir, f'{todaystr}_MWR.png')
 plt.savefig(file_path, bbox_inches='tight')
 
@@ -629,7 +719,7 @@ SENDER_EMAIL = "beckerman1101@gmail.com"
 SENDER_PASSWORD = os.getenv('GMAIL_PW')
 
 # Recipient email
-RECIPIENT_EMAILS = ["brendan.eckerman@state.co.us", "michael.chapman@state.co.us", "nicholas.barlow@state.co.us","bob.fifer@state.co.us","shawn.smith@state.co.us","james.fox@state.co.us","phillip.embry@state.co.us"]
+RECIPIENT_EMAILS = ["brendan.eckerman@state.co.us"] #"michael.chapman@state.co.us", "nicholas.barlow@state.co.us","bob.fifer@state.co.us","shawn.smith@state.co.us","james.fox@state.co.us","phillip.embry@state.co.us"]
 
 # Email Subject & Body
 SUBJECT = f"Morning Weather Report - {todayst}"
